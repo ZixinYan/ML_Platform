@@ -17,9 +17,7 @@ import com.ml.member.exception.PhoneException;
 import com.ml.member.exception.UsernameException;
 import com.ml.member.service.MemberService;
 import com.ml.member.utils.HttpClientUtils;
-import com.ml.member.vo.MemberUserLoginVo;
-import com.ml.member.vo.MemberUserRegisterVo;
-import com.ml.member.vo.SocialUser;
+import com.ml.member.vo.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -125,10 +123,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
     }
 
     @Override
-    public MemberEntity login(SocialUser socialUser) throws Exception {
+    public MemberEntity login(WeiboUser weiboUser) throws Exception {
 
         //具有登录和注册逻辑
-        String uid = socialUser.getUid();
+        String uid = weiboUser.getUid();
 
         //1、判断当前社交用户是否已经登录过系统
         MemberEntity memberEntity = this.baseMapper.selectOne(new QueryWrapper<MemberEntity>().eq("social_uid", uid));
@@ -138,20 +136,20 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             //更新用户的访问令牌的时间和access_token
             MemberEntity update = new MemberEntity();
             update.setId(memberEntity.getId());
-            update.setAccessToken(socialUser.getAccess_token());
-            update.setExpiresIn(socialUser.getExpires_in());
+            update.setAccessToken(weiboUser.getAccess_token());
+            update.setExpiresIn(weiboUser.getExpires_in());
             this.baseMapper.updateById(update);
 
-            memberEntity.setAccessToken(socialUser.getAccess_token());
-            memberEntity.setExpiresIn(socialUser.getExpires_in());
+            memberEntity.setAccessToken(weiboUser.getAccess_token());
+            memberEntity.setExpiresIn(weiboUser.getExpires_in());
             return memberEntity;
         } else {
             //2、没有查到当前社交用户对应的记录我们就需要注册一个
             MemberEntity register = new MemberEntity();
             //3、查询当前社交用户的社交账号信息（昵称、性别等）
             Map<String,String> query = new HashMap<>();
-            query.put("access_token",socialUser.getAccess_token());
-            query.put("uid",socialUser.getUid());
+            query.put("access_token", weiboUser.getAccess_token());
+            query.put("uid", weiboUser.getUid());
             HttpResponse response = HttpUtils.doGet("https://api.weibo.com", "/2/users/show.json", "get", new HashMap<String, String>(), query);
 
             if (response.getStatusLine().getStatusCode() == 200) {
@@ -166,9 +164,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
                 register.setGender("m".equals(gender)?1:0);
                 register.setAvatar(profileImageUrl);
                 register.setCreateTime(new Date());
-                register.setSocialUid(socialUser.getUid());
-                register.setAccessToken(socialUser.getAccess_token());
-                register.setExpiresIn(socialUser.getExpires_in());
+                register.setSocialUid(weiboUser.getUid());
+                register.setAccessToken(weiboUser.getAccess_token());
+                register.setExpiresIn(weiboUser.getExpires_in());
 
                 //把用户信息插入到数据库中
                 this.baseMapper.insert(register);
@@ -180,12 +178,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
     }
 
     @Override
-    public MemberEntity login(String accessTokenInfo) {
-
+    public MemberEntity login(WxUser wxUser) throws Exception {
         //从accessTokenInfo中获取出来两个值 access_token 和 oppenid
         //把accessTokenInfo字符串转换成map集合，根据map里面中的key取出相对应的value
         Gson gson = new Gson();
-        HashMap accessMap = gson.fromJson(accessTokenInfo, HashMap.class);
+        HashMap accessMap = gson.fromJson(wxUser.getAccessTokenInfo(), HashMap.class);
         String accessToken = (String) accessMap.get("access_token");
         String openid = (String) accessMap.get("openid");
 
@@ -226,6 +223,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             this.baseMapper.insert(memberEntity);
         }
         return memberEntity;
+    }
+
+    // TODO 完成github登录逻辑
+    @Override
+    public MemberEntity login(GithubUser githubUser) throws Exception {
+        return null;
     }
 
 

@@ -6,7 +6,7 @@ import lombok.Data;
  * @email 894548575@qq.com
  */
 @Data
-public class SocialUser {
+public class WeiboUser {
 
     private String access_token;
 

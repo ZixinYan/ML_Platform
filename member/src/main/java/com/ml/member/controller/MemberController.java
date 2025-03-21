@@ -6,9 +6,7 @@ import com.ml.member.entity.MemberEntity;
 import com.ml.member.exception.PhoneException;
 import com.ml.member.exception.UsernameException;
 import com.ml.member.service.MemberService;
-import com.ml.member.vo.MemberUserLoginVo;
-import com.ml.member.vo.MemberUserRegisterVo;
-import com.ml.member.vo.SocialUser;
+import com.ml.member.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,10 +49,10 @@ public class MemberController {
     }
 
 
-    @PostMapping(value = "/oauth2/login")
-    public R oauthLogin(@RequestBody SocialUser socialUser) throws Exception {
+    @PostMapping(value = "/weibo/login")
+    public R oauthLogin(@RequestBody WeiboUser weiboUser) throws Exception {
 
-        MemberEntity memberEntity = memberService.login(socialUser);
+        MemberEntity memberEntity = memberService.login(weiboUser);
 
         if (memberEntity != null) {
             return R.ok().setData(memberEntity);
@@ -64,13 +62,23 @@ public class MemberController {
     }
 
     @PostMapping(value = "/weixin/login")
-    public R weixinLogin(@RequestParam("accessTokenInfo") String accessTokenInfo) {
+    public R weixinLogin(@RequestBody WxUser wxUser) throws Exception {
 
-        MemberEntity memberEntity = memberService.login(accessTokenInfo);
+        MemberEntity memberEntity = memberService.login(wxUser);
         if (memberEntity != null) {
             return R.ok().setData(memberEntity);
         } else {
             return R.error(BizCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID.getCode(),BizCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID.getMsg());
+        }
+    }
+
+    @PostMapping(value = "/github/login")
+    public R githubLogin(@RequestBody GithubUser githubUser) throws Exception {
+        MemberEntity memberEntity = memberService.login(githubUser);
+        if (memberEntity != null) {
+            return R.ok().setData(memberEntity);
+        }else{
+            return R.error(BizCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID.getCode(), BizCodeEnum.LOGIN_ACCOUNT_PASSWORD_INVALID.getMsg());
         }
     }
 

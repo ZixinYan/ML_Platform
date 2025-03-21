@@ -1,9 +1,7 @@
 package com.ml.authserver.feign;
 
 
-import com.ml.authserver.vo.SocialUser;
-import com.ml.authserver.vo.UserLoginVo;
-import com.ml.authserver.vo.UserRegisterVo;
+import com.ml.authserver.vo.*;
 import com.ml.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,8 +19,11 @@ public interface MemberFeignService {
     R login(@RequestBody UserLoginVo vo);
 
     @PostMapping("/member/member/oauth2/login")
-    R oauth2Login(@RequestBody SocialUser vo) throws Exception;
+    R weiboLogin(@RequestBody WeiboUser vo) throws Exception;
 
     @PostMapping(value = "/member/member/weixin/login")
-    R weixinLogin(@RequestParam("accessTokenInfo") String accessTokenInfo);
+    R weixinLogin(@RequestBody WxUser vo) throws Exception;
+
+    @PostMapping(value = "member/member/github/login")
+    R githubLogin(@RequestBody GithubUser vo) throws Exception;
 }

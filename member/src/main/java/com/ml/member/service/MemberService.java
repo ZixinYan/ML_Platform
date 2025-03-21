@@ -5,9 +5,7 @@ import com.ml.common.utils.PageUtils;
 import com.ml.member.entity.MemberEntity;
 import com.ml.member.exception.PhoneException;
 import com.ml.member.exception.UsernameException;
-import com.ml.member.vo.MemberUserLoginVo;
-import com.ml.member.vo.MemberUserRegisterVo;
-import com.ml.member.vo.SocialUser;
+import com.ml.member.vo.*;
 
 import java.util.Map;
 
@@ -48,16 +46,23 @@ public interface MemberService extends IService<MemberEntity> {
 
     /**
      * 社交用户的登录
-     * @param socialUser
+     * @param weiboUser
      * @return
      */
-    MemberEntity login(SocialUser socialUser) throws Exception;
+    MemberEntity login(WeiboUser weiboUser) throws Exception;
 
     /**
      * 微信登录
-     * @param accessTokenInfo
+     * @param wxUser
      * @return
      */
-    MemberEntity login(String accessTokenInfo);
+    MemberEntity login(WxUser wxUser) throws Exception;
+
+    /**
+     * Github登录
+     * @param githubUser
+     * @return
+     */
+    MemberEntity login(GithubUser githubUser) throws Exception;
 }
 

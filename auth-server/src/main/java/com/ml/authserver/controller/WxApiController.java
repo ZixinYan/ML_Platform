@@ -4,6 +4,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.ml.authserver.feign.MemberFeignService;
 import com.ml.authserver.utils.ConstantWxUtils;
 import com.ml.authserver.utils.HttpClientUtils;
+import com.ml.authserver.vo.WxUser;
 import com.ml.common.exception.BizCodeEnum;
 import com.ml.common.utils.R;
 import com.ml.common.vo.MemberRespVo;
@@ -58,7 +59,9 @@ public class WxApiController {
             );
 
             String accessTokenInfo = HttpClientUtils.get(accessTokenUrl);
-            R r = memberFeignService.weixinLogin(accessTokenInfo);
+            WxUser wxUser = new WxUser();
+            wxUser.setAccessTokenInfo(accessTokenInfo);
+            R r = memberFeignService.weixinLogin(wxUser);
             if (r.getCode() == 0) {
                 MemberRespVo data = (MemberRespVo) r.getData();
                 log.info("登录成功：用户信息：{}",data.toString());
