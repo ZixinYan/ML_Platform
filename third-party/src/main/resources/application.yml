@@ -1,0 +1,24 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.35.128:8848
+    alicloud:
+      access-key: LTAI5tLGjwjsSjxuYVhcc7Yp
+      secret-key: 30S0VHdFmc0u4ZGfRu1BhSGIiAnhcR
+      oss:
+        endpoint: oss-cn-beijing.aliyuncs.com
+        bucket: web-personal-page
+
+      sms:
+        host: https://send.market.alicloudapi.com
+        path: /sms/send
+        appCode: 45784e7cf368430caa9236e042d41bf2
+        tpl_id: lxym_20111_sdgsfhwqgvyh
+  application:
+    name: third-party
+server:
+  port: 30000
+
+# TODO : 
+# 在Nacos上添加oss配置信息
