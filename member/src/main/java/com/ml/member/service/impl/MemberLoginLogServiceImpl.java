@@ -26,4 +26,6 @@ public class MemberLoginLogServiceImpl extends ServiceImpl<MemberLoginLogDao, Me
         return new PageUtils(page);
     }
 
+
+
 }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/GateWay/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/PK/Search/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/PK/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Search/src/main/java" charset="UTF-8" />
@@ -9,6 +8,10 @@
     <file url="file://$PROJECT_DIR$/auth-server/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/auth/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/game-getflag/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/game-getflag/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/gateway/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/member/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/member/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />

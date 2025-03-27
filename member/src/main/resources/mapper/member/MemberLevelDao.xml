@@ -17,8 +17,10 @@
         <result property="note" column="note"/>
     </resultMap>
     <select id="getDefaultLevel" resultType="com.ml.member.entity.MemberLevelEntity">
-        select * from ums_member_level where default_status = 1
+        select * from member_level where default_status = 1
     </select>
-
+    <select id="getAllLevels" resultMap="memberLevelMap">
+        SELECT * FROM member_level ORDER BY growth_point ASC
+    </select>
 
 </mapper>

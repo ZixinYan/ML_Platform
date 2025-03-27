@@ -3,7 +3,6 @@ package com.ml.member.entity;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -25,5 +24,4 @@ public class GrowthChangeHistoryEntity implements Serializable {
 	 * 积分来源[0-购物，1-管理员修改]
 	 */
 	private Integer sourceType;
-
 }

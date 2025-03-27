@@ -1,28 +1,29 @@
 package com.ml.authserver.controller;
 
 import com.alibaba.fastjson.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ml.authserver.feign.MemberFeignService;
 import com.ml.authserver.feign.ThirdPartyFeignService;
+import com.ml.authserver.utils.IPUtils;
 import com.ml.authserver.vo.UserLoginVo;
 import com.ml.authserver.vo.UserRegisterVo;
 import com.ml.common.constant.AuthServerConstant;
 import com.ml.common.exception.BizCodeEnum;
 import com.ml.common.utils.R;
-import com.ml.common.vo.MemberRespVo;
+import com.ml.authserver.vo.MemberRespVo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -30,7 +31,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-@Controller
+@Slf4j
+@RestController
 public class LoginController {
     @Autowired
     private ThirdPartyFeignService feignService;
@@ -38,7 +40,8 @@ public class LoginController {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private MemberFeignService memberFeignService;
-
+    @Autowired
+    private ObjectMapper objectMapper;
     @GetMapping("/sms/sendCode")
     @ResponseBody
     public R sendCode(@RequestParam("phone") String phone){
@@ -53,7 +56,10 @@ public class LoginController {
             }
         }
         //2、验证码再次校验，存redis ,key=phone,value=code
-        String code = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 5);
+        SecureRandom random = new SecureRandom();
+        int codeNum = 10000 + random.nextInt(90000); // 生成 [10000, 99999] 之间的随机数
+        String code = String.valueOf(codeNum);
+        log.info(code);
         //redis中存储的验证码+时间戳
         String redisValue = code +"_"+System.currentTimeMillis();
         //redis缓存验证码，防止同一个手机号再次发送验证码
@@ -103,26 +109,16 @@ public class LoginController {
     @PostMapping("/login")
     public R login(UserLoginVo vo, BindingResult result, HttpSession session){
         //远程登录
+        String ip = IPUtils.getClientIp();
+        vo.setIP(ip);
         R r = memberFeignService.login(vo);
         if (r.getCode()==0){
-            MemberRespVo data = (MemberRespVo) r.getData();
+            ObjectMapper objectMapper = new ObjectMapper();
+            MemberRespVo data = objectMapper.convertValue(r.getData(), MemberRespVo.class);
             session.setAttribute(AuthServerConstant.SESSION_LOGIN_KEY,data);
             return R.ok(AuthServerConstant.SESSION_LOGIN_KEY,data);
         }else{
             return R.error(r.getCode(),r.getMsg());
         }
     }
-
-    @GetMapping("/login.html")
-    public R loginPage(HttpSession session){
-        Object attribute = session.getAttribute(AuthServerConstant.SESSION_LOGIN_KEY);
-        if (attribute == null){
-            //没登录去登录页
-            return R.error(BizCodeEnum.USER_NOT_LOGIN.getCode(),BizCodeEnum.USER_NOT_LOGIN.getMsg());
-        }else {
-            //已登录去首页
-            return R.ok();
-        }
-    }
-
 }

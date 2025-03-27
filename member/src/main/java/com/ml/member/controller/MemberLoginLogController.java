@@ -25,8 +25,7 @@ public class MemberLoginLogController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
-    //@RequiresPermissions("member:memberloginlog:list")
+    @GetMapping("/list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = memberLoginLogService.queryPage(params);
 
@@ -37,30 +36,25 @@ public class MemberLoginLogController {
     /**
      * 信息
      */
-    @RequestMapping("/info/{id}")
-    //@RequiresPermissions("member:memberloginlog:info")
-    public R info(@PathVariable("id") Long id){
+    @GetMapping("/info")
+    public R info(@RequestParam("id") Long id){
 		MemberLoginLogEntity memberLoginLog = memberLoginLogService.getById(id);
-
         return R.ok(memberLoginLog);
     }
 
     /**
      * 保存
      */
-    @RequestMapping("/save")
-    //@RequiresPermissions("member:memberloginlog:save")
+    @PostMapping("/save")
     public R save(@RequestBody MemberLoginLogEntity memberLoginLog){
 		memberLoginLogService.save(memberLoginLog);
-
         return R.ok();
     }
 
     /**
      * 修改
      */
-    @RequestMapping("/update")
-    //@RequiresPermissions("member:memberloginlog:update")
+    @PostMapping("/update")
     public R update(@RequestBody MemberLoginLogEntity memberLoginLog){
 		memberLoginLogService.updateById(memberLoginLog);
 
@@ -70,8 +64,7 @@ public class MemberLoginLogController {
     /**
      * 删除
      */
-    @RequestMapping("/delete")
-    //@RequiresPermissions("member:memberloginlog:delete")
+    @DeleteMapping("/delete")
     public R delete(@RequestBody Long[] ids){
 		memberLoginLogService.removeByIds(Arrays.asList(ids));
 

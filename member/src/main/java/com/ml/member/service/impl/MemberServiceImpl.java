@@ -5,21 +5,31 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.ml.common.utils.HttpUtils;
 import com.ml.common.utils.PageUtils;
 import com.ml.common.utils.Query;
 import com.ml.member.dao.MemberDao;
 import com.ml.member.dao.MemberLevelDao;
+import com.ml.member.dao.MemberLoginLogDao;
 import com.ml.member.entity.MemberEntity;
 import com.ml.member.entity.MemberLevelEntity;
+import com.ml.member.entity.MemberLoginLogEntity;
 import com.ml.member.exception.PhoneException;
 import com.ml.member.exception.UsernameException;
 import com.ml.member.service.MemberService;
 import com.ml.member.utils.HttpClientUtils;
 import com.ml.member.vo.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +38,18 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-
+@Slf4j
 @Service("memberService")
 public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> implements MemberService {
 
     @Resource
     private MemberLevelDao memberLevelDao;
+
+    @Resource
+    private MemberLoginLogDao memberLoginLogDao;
+
+    @Autowired
+    private LevelCacheServiceImpl levelCacheService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -96,13 +112,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
     @Override
     public MemberEntity login(MemberUserLoginVo vo) {
-
-        String loginacct = vo.getLoginacct();
+        String loginAccount = vo.getUserName();
         String password = vo.getPassword();
-
-        //1、去数据库查询 SELECT * FROM ums_member WHERE username = ? OR mobile = ?
+        Integer type = vo.getType();
+        //1、去数据库查询 SELECT * FROM member_info WHERE username = ? OR mobile = ?
         MemberEntity memberEntity = this.baseMapper.selectOne(new QueryWrapper<MemberEntity>()
-                .eq("username", loginacct).or().eq("mobile", loginacct));
+                .eq("username", loginAccount).or().eq("mobile", loginAccount));
 
         if (memberEntity == null) {
             //登录失败
@@ -114,7 +129,14 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             //进行密码匹配
             boolean matches = passwordEncoder.matches(password, password1);
             if (matches) {
-                //登录成功
+                //登录成功,记录登录历史
+                MemberLoginLogEntity loginLogEntity = new MemberLoginLogEntity();
+                loginLogEntity.setMemberId(memberEntity.getId());
+                loginLogEntity.setIp(vo.getIP());
+                loginLogEntity.setCreateTime(new Date());
+                loginLogEntity.setType(type);
+                memberLoginLogDao.insert(loginLogEntity);
+
                 return memberEntity;
             }
         }
@@ -136,10 +158,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             //更新用户的访问令牌的时间和access_token
             MemberEntity update = new MemberEntity();
             update.setId(memberEntity.getId());
+            update.setUpdateTime(new Date());
             update.setAccessToken(weiboUser.getAccess_token());
             update.setExpiresIn(weiboUser.getExpires_in());
             this.baseMapper.updateById(update);
-
             memberEntity.setAccessToken(weiboUser.getAccess_token());
             memberEntity.setExpiresIn(weiboUser.getExpires_in());
             return memberEntity;
@@ -159,7 +181,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
                 String name = jsonObject.getString("name");
                 String gender = jsonObject.getString("gender");
                 String profileImageUrl = jsonObject.getString("profile_image_url");
-
+                MemberLevelEntity levelEntity = memberLevelDao.getDefaultLevel();
+                register.setLevelId(levelEntity.getId());
                 register.setNickname(name);
                 register.setGender("m".equals(gender)?1:0);
                 register.setAvatar(profileImageUrl);
@@ -182,7 +205,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         //从accessTokenInfo中获取出来两个值 access_token 和 oppenid
         //把accessTokenInfo字符串转换成map集合，根据map里面中的key取出相对应的value
         Gson gson = new Gson();
-        HashMap accessMap = gson.fromJson(wxUser.getAccessTokenInfo(), HashMap.class);
+        HashMap accessMap = gson.fromJson(wxUser.getAccessToken(), HashMap.class);
         String accessToken = (String) accessMap.get("access_token");
         String openid = (String) accessMap.get("openid");
 
@@ -224,12 +247,80 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         }
         return memberEntity;
     }
-
-    // TODO 完成github登录逻辑
     @Override
     public MemberEntity login(GithubUser githubUser) throws Exception {
-        return null;
+        String accessToken = githubUser.getAccess_token();
+        String apiUrl = "https://api.github.com/user";
+        JsonNode userInfo;
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpGet request = new HttpGet(apiUrl);
+            request.addHeader("Authorization", "Bearer " + accessToken);
+            request.addHeader("Accept", "application/json");
+
+            try (CloseableHttpResponse response = httpClient.execute(request)) {
+                if (response.getStatusLine().getStatusCode() != 200) {
+                    return null;
+                }
+                String responseBody = EntityUtils.toString(response.getEntity());
+                ObjectMapper objectMapper = new ObjectMapper();
+                userInfo =  objectMapper.readTree(responseBody);
+            }
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+        if (userInfo == null) {
+            throw new RuntimeException("Failed to fetch user info from GitHub");
+        }
+
+        // 解析 GitHub 用户信息
+        String githubId = userInfo.get("id").asText();
+        String username = userInfo.get("name").asText();
+        String nickName = userInfo.get("login").asText();
+        String avatarUrl = userInfo.get("avatar_url").asText();
+        String email = userInfo.has("email") ? userInfo.get("email").asText() : null;
+
+        // 在数据库中查找用户
+        MemberEntity member = this.baseMapper.selectOne(new QueryWrapper<MemberEntity>().eq("social_uid", githubId));
+        if (member == null) {
+            // 新建用户
+            member = new MemberEntity();
+            MemberLevelEntity levelEntity = memberLevelDao.getDefaultLevel();
+            member.setLevelId(levelEntity.getId());
+            member.setSocialUid(githubId);
+            member.setUsername(username);
+            member.setAvatar(avatarUrl);
+            member.setEmail(email);
+            member.setStatus(1);
+            member.setNickname(nickName);
+            member.setAccessToken(accessToken);
+            member.setCreateTime(new Date());
+            this.baseMapper.insert(member);
+        } else {
+            // 更新用户信息
+            member.setUsername(username);
+            member.setAvatar(avatarUrl);
+            member.setAccessToken(accessToken);
+            member.setUpdateTime(new Date());
+            member.setEmail(email);
+            this.baseMapper.updateById(member);
+        }
+        log.info(member.toString());
+        return member;
     }
 
+    @Override
+    public MemberLevelEntity getNewLevel(Integer growthPoint) {
+        Map<Integer, MemberLevelEntity> levelCache = levelCacheService.getLevelCache();
+        MemberLevelEntity nowLevel = null;
 
+        for (Map.Entry<Integer, MemberLevelEntity> entry : levelCache.entrySet()) {
+            if (growthPoint >= entry.getKey()) {
+                if (nowLevel == null || entry.getKey() > nowLevel.getGrowthPoint()) {
+                    nowLevel = entry.getValue();
+                }
+            }
+        }
+        return nowLevel;
+    }
 }

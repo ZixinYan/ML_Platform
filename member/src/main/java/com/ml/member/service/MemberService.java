@@ -3,16 +3,13 @@ package com.ml.member.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ml.common.utils.PageUtils;
 import com.ml.member.entity.MemberEntity;
+import com.ml.member.entity.MemberLevelEntity;
 import com.ml.member.exception.PhoneException;
 import com.ml.member.exception.UsernameException;
 import com.ml.member.vo.*;
 
 import java.util.Map;
 
-/**
- * @author yaoxinjia
- * @email 894548575@qq.com
- */
 public interface MemberService extends IService<MemberEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
@@ -64,5 +61,7 @@ public interface MemberService extends IService<MemberEntity> {
      * @return
      */
     MemberEntity login(GithubUser githubUser) throws Exception;
+
+    MemberLevelEntity getNewLevel(Integer newGrowthPoint);
 }
 

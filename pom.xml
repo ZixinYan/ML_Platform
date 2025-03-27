@@ -13,6 +13,9 @@
 		<module>common</module>
 		<module>member</module>
 		<module>auth-server</module>
+		<module>third-party</module>
+		<module>gateway</module>
+		<module>game-getflag</module>
 	</modules>
 
 </project>

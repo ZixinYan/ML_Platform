@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("member")
 public interface MemberFeignService {
 
-    @PostMapping("/member/member/regist")
+    @PostMapping("/member/member/register")
     R regist(@RequestBody UserRegisterVo userRegisterVo);
 
     @PostMapping("/member/member/login")

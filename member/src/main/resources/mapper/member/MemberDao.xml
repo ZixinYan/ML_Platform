@@ -12,17 +12,13 @@
         <result property="nickname" column="nickname"/>
         <result property="mobile" column="mobile"/>
         <result property="email" column="email"/>
-        <result property="header" column="header"/>
+        <result property="avatar" column="avatar"/>
         <result property="gender" column="gender"/>
-        <result property="birth" column="birth"/>
-        <result property="city" column="city"/>
-        <result property="job" column="job"/>
-        <result property="sign" column="sign"/>
-        <result property="sourceType" column="source_type"/>
         <result property="integration" column="integration"/>
         <result property="growth" column="growth"/>
         <result property="status" column="status"/>
         <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
         <result property="socialUid" column="social_uid"/>
         <result property="accessToken" column="access_token"/>
         <result property="expiresIn" column="expires_in"/>

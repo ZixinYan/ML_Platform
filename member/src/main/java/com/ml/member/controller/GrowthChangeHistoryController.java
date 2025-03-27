@@ -4,6 +4,7 @@ import com.ml.common.utils.PageUtils;
 import com.ml.common.utils.R;
 import com.ml.member.entity.GrowthChangeHistoryEntity;
 import com.ml.member.service.GrowthChangeHistoryService;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,7 @@ public class GrowthChangeHistoryController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     //@RequiresPermissions("member:growthchangehistory:list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = growthChangeHistoryService.queryPage(params);
@@ -33,40 +34,34 @@ public class GrowthChangeHistoryController {
     /**
      * 信息
      */
-    @RequestMapping("/info/{id}")
+    @PostMapping("/info")
     //@RequiresPermissions("member:growthchangehistory:info")
-    public R info(@PathVariable("id") Long id){
+    public R info(@RequestParam("id") Long id){
 		GrowthChangeHistoryEntity growthChangeHistory = growthChangeHistoryService.getById(id);
         return R.ok(growthChangeHistory);
     }
 
-    /**
-     * 保存
-     */
-    @RequestMapping("/save")
+    @PostMapping("/save")
     //@RequiresPermissions("member:growthchangehistory:save")
     public R save(@RequestBody GrowthChangeHistoryEntity growthChangeHistory){
 		growthChangeHistoryService.save(growthChangeHistory);
-
         return R.ok();
     }
 
     /**
      * 修改
      */
-    @RequestMapping("/update")
+    @PostMapping("/update")
     //@RequiresPermissions("member:growthchangehistory:update")
     public R update(@RequestBody GrowthChangeHistoryEntity growthChangeHistory){
 		growthChangeHistoryService.updateById(growthChangeHistory);
-
         return R.ok();
     }
 
     /**
      * 删除
      */
-    @RequestMapping("/delete")
-    //@RequiresPermissions("member:growthchangehistory:delete")
+    @DeleteMapping("/delete")
     public R delete(@RequestBody Long[] ids){
 		growthChangeHistoryService.removeByIds(Arrays.asList(ids));
 

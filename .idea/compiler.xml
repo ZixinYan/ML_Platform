@@ -9,6 +9,8 @@
         <outputRelativeToContentRoot value="true" />
         <module name="member" />
         <module name="common" />
+        <module name="game-getflag" />
+        <module name="gateway" />
         <module name="auth-server" />
         <module name="third-party" />
       </profile>
@@ -22,6 +24,8 @@
       <module name="auth-server" options="" />
       <module name="common" options="" />
       <module name="demo" options="" />
+      <module name="game-getflag" options="" />
+      <module name="gateway" options="" />
       <module name="member" options="" />
       <module name="third-party" options="" />
     </option>

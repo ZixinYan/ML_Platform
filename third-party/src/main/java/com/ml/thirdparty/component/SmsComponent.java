@@ -1,7 +1,8 @@
 package com.ml.thirdparty.component;
 
-import com.ml.common.utils.HttpUtils;
+import com.ml.thirdparty.util.HttpUtils;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @ConfigurationProperties(prefix = "spring.cloud.alicloud.sms")
 @Data
+@Slf4j
 @Component
 public class SmsComponent {
     private String host;
@@ -30,14 +32,14 @@ public class SmsComponent {
         headers.put("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         Map<String, String> querys = new HashMap<String, String>();
         Map<String, String> bodys = new HashMap<String, String>();
-        bodys.put("content", code);
+        bodys.put("content", "code:"+code);
         bodys.put("templateid", tpl_id);
         bodys.put("mobile", phone);
 
 
         try {
             HttpResponse response = HttpUtils.doPost(host, path, method, headers, querys, bodys);
-            System.out.println(response.toString());
+            log.info(response.toString());
             //获取response的body
             //System.out.println(EntityUtils.toString(response.getEntity()));
         } catch (Exception e) {

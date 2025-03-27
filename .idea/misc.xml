@@ -17,6 +17,8 @@
         <option value="$PROJECT_DIR$/auth-server/pom.xml" />
         <option value="$PROJECT_DIR$/thrid-party/pom.xml" />
         <option value="$PROJECT_DIR$/third-party/pom.xml" />
+        <option value="$PROJECT_DIR$/game-getflag/pom.xml" />
+        <option value="$PROJECT_DIR$/gateway/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

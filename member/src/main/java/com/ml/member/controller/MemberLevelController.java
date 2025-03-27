@@ -4,16 +4,13 @@ import com.ml.common.utils.PageUtils;
 import com.ml.common.utils.R;
 import com.ml.member.entity.MemberLevelEntity;
 import com.ml.member.service.MemberLevelService;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Map;
 
-/**
- *
- * @author yaoxinjia
- */
 @RestController
 @RequestMapping("member/memberlevel")
 public class MemberLevelController {
@@ -23,7 +20,7 @@ public class MemberLevelController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     //@RequiresPermissions("member:memberlevel:list")
     public R list(@RequestParam Map<String, Object> params){
         PageUtils page = memberLevelService.queryPage(params);
@@ -35,9 +32,9 @@ public class MemberLevelController {
     /**
      * 信息
      */
-    @RequestMapping("/info/{id}")
+    @PostMapping("/info")
     //@RequiresPermissions("member:memberlevel:info")
-    public R info(@PathVariable("id") Long id){
+    public R info(@RequestParam("id") Long id){
 		MemberLevelEntity memberLevel = memberLevelService.getById(id);
         return R.ok(memberLevel);
     }
@@ -45,7 +42,7 @@ public class MemberLevelController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @PostMapping("/save")
     //@RequiresPermissions("member:memberlevel:save")
     public R save(@RequestBody MemberLevelEntity memberLevel){
 		memberLevelService.save(memberLevel);
@@ -55,7 +52,7 @@ public class MemberLevelController {
     /**
      * 修改
      */
-    @RequestMapping("/update")
+    @PostMapping("/update")
     //@RequiresPermissions("member:memberlevel:update")
     public R update(@RequestBody MemberLevelEntity memberLevel){
 		memberLevelService.updateById(memberLevel);
@@ -66,7 +63,7 @@ public class MemberLevelController {
     /**
      * 删除
      */
-    @RequestMapping("/delete")
+    @DeleteMapping("/delete")
     //@RequiresPermissions("member:memberlevel:delete")
     public R delete(@RequestBody Long[] ids){
 		memberLevelService.removeByIds(Arrays.asList(ids));

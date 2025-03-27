@@ -1,5 +1,6 @@
 package com.ml.member.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -23,6 +24,8 @@ public class MemberEntity {
     private String avatar;
     private String socialUid;
     private Integer gender;
+    private Integer integration;
+    private Integer growth;
     private Integer status;
     private Date createTime;
     private Date updateTime;
