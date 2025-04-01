@@ -20,10 +20,8 @@ public class SentinelGatewayConfig {
             //网关限流了请求，就会调用此回调
             @Override
             public Mono<ServerResponse> handleRequest(ServerWebExchange exchange, Throwable t) {
-
                 R error = R.error(BizCodeEnum.TO_MANY_REQUEST.getCode(), BizCodeEnum.TO_MANY_REQUEST.getMsg());
                 String errorJson = JSON.toJSONString(error);
-
                 Mono<ServerResponse> body = ServerResponse.ok().body(Mono.just(errorJson), String.class);
                 return body;
             }
