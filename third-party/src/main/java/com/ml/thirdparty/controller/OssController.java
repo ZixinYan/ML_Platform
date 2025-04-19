@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 /**
  */
-@RestController
+@RestController("third-party")
 public class OssController {
 
     @Autowired
@@ -32,7 +32,7 @@ public class OssController {
     private String accessId;
 
     Map<String,String> respMap = null;
-    @RequestMapping("oss/policy")
+    @RequestMapping("/oss/policy")
     public R policy() {
         // host的格式为 bucketname.endpoint
         String host = "https://" + bucket + "." + endpoint;

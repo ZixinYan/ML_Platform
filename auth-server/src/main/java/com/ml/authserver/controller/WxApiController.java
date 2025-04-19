@@ -37,7 +37,7 @@ import static com.ml.common.constant.AuthServerConstant.SESSION_LOGIN_KEY;
 @Slf4j
 @Controller
 @RestController
-@RequestMapping( "/wx")
+@RequestMapping( "auth/wx")
 public class WxApiController {
 
     @Autowired

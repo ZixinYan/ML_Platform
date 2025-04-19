@@ -3,10 +3,11 @@ import com.alibaba.fastjson.JSON;
 import com.ml.authserver.feign.MemberFeignService;
 import com.ml.authserver.utils.IPUtils;
 import com.ml.authserver.vo.GithubUser;
-import com.ml.authserver.vo.MemberRespVo;
+
 import com.ml.common.constant.AuthServerConstant;
 import com.ml.common.exception.BizCodeEnum;
 import com.ml.common.utils.R;
+import com.ml.common.vo.MemberRespVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
-@RequestMapping("/github")
+@RequestMapping("auth/github")
 public class GitHubController {
 
     @Autowired

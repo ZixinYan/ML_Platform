@@ -19,6 +19,8 @@
         <option value="$PROJECT_DIR$/third-party/pom.xml" />
         <option value="$PROJECT_DIR$/game-getflag/pom.xml" />
         <option value="$PROJECT_DIR$/gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/blog/pom.xml" />
+        <option value="$PROJECT_DIR$/ai-chat/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

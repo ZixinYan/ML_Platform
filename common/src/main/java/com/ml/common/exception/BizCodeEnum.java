@@ -15,7 +15,8 @@ public enum BizCodeEnum {
     LOGIN_ACCOUNT_PASSWORD_INVALID(15003, "用户名或密码错误"),
     PHONE_EXISTS_EXCEPTION(15004,"手机号已存在"),
     REGISTER_ERROR(15005,"复杂错误"),
-    THIRD_PARTY_ERROR(20000,"第三方服务调用失败");
+    THIRD_PARTY_ERROR(20000,"第三方服务调用失败"),
+    BLOG_NOT_FOUND(60001,"博客不存在");
 
 
     private final Integer code;

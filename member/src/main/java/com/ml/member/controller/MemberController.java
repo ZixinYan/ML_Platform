@@ -1,4 +1,6 @@
 package com.ml.member.controller;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.ml.common.exception.BizCodeEnum;
 import com.ml.common.utils.PageUtils;
@@ -15,12 +17,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Slf4j
 @RestController
-@RequestMapping("member/member")
+@RequestMapping("/member/member")
 public class MemberController {
     @Autowired
     private MemberService memberService;
@@ -88,12 +92,18 @@ public class MemberController {
     /**
      * 列表
      */
-    @RequestMapping("/list")
+    @GetMapping("/list")
     //@RequiresPermissions("member:member:list")
-    public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = memberService.queryPage(params);
-
-        return R.ok(page);
+    public R list(@RequestParam List<Long> memberIds){
+        String join = StrUtil.join(",", memberIds);
+        List<MemberShowVo> memberVo = memberService.lambdaQuery()
+                .in(MemberEntity::getId, memberIds)
+                .last("order by field(id,"+ join +")")
+                .list()
+                .stream().map(member ->
+                        BeanUtil.copyProperties(member, MemberShowVo.class)
+                ).collect(Collectors.toList());
+        return R.ok(memberVo);
     }
     /**
      * 信息
@@ -101,7 +111,6 @@ public class MemberController {
     @GetMapping("/info")
     public R info(@RequestParam("id")  Long id){
 		MemberEntity member = memberService.getById(id);
-
         return R.ok(member);
     }
     /**

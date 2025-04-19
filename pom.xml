@@ -15,7 +15,8 @@
 		<module>auth-server</module>
 		<module>third-party</module>
 		<module>gateway</module>
-		<module>game-getflag</module>
+		<module>ai-chat</module>
+		<module>blog</module>
 	</modules>
 
 </project>

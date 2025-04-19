@@ -26,7 +26,7 @@ import javax.servlet.http.HttpSession;
  */
 @Slf4j
 @RestController
-@RequestMapping("/weibo")
+@RequestMapping("auth/weibo")
 public class WeiboController {
     @Autowired
     private MemberFeignService memberFeignService;

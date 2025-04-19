@@ -10,7 +10,7 @@ import com.ml.authserver.vo.UserRegisterVo;
 import com.ml.common.constant.AuthServerConstant;
 import com.ml.common.exception.BizCodeEnum;
 import com.ml.common.utils.R;
-import com.ml.authserver.vo.MemberRespVo;
+import com.ml.common.vo.MemberRespVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
+@RequestMapping("/auth")
 public class LoginController {
     @Autowired
     private ThirdPartyFeignService feignService;
@@ -116,6 +117,7 @@ public class LoginController {
             ObjectMapper objectMapper = new ObjectMapper();
             MemberRespVo data = objectMapper.convertValue(r.getData(), MemberRespVo.class);
             session.setAttribute(AuthServerConstant.SESSION_LOGIN_KEY,data);
+            log.info(session.getId());
             return R.ok(AuthServerConstant.SESSION_LOGIN_KEY,data);
         }else{
             return R.error(r.getCode(),r.getMsg());
