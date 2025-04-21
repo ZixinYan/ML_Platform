@@ -2,7 +2,7 @@
 
 一个基于 **SpringCloud** 的机器学习平台后端工程，致力于构建多功能、可扩展的 AI 服务支撑平台。
 
-> 💡 技术栈：SpringCloud · Nacos · Mybatis-Plus · Redis · MySQL · Kafka · Elasticsearch · Nginx
+> 💡 技术栈：SpringCloud + SpringBoot3.x · Nacos · Mybatis-Plus · Redis · MySQL · Kafka · Elasticsearch · Nginx
 
 ---
 
@@ -65,9 +65,9 @@ git clone https://github.com/ZixinYan/ML_Platform.git
 
 - 当前使用的是 Spring Boot 2.x 版本，由于 SpringAI 仅支持 3.x+，部分功能（如 Ollama 接入）使用 WebSocket 自行实现
 - **未来计划：**
-  - 升级整体架构至 Spring Boot 3.x
-  - 引入 [Spring AI](https://spring.io/projects/spring-ai)，统一支持多模态模型（MCP）如图像/文本输入等
-  - 将项目核心丰富一下
+  - [√]升级整体架构至 Spring Boot 3.x
+  - [ ]引入 [Spring AI](https://spring.io/projects/spring-ai)，统一支持多模态模型（MCP）如图像/文本输入等
+  - [ ]将项目核心丰富一下
 
 ---
 
