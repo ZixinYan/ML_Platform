@@ -16,6 +16,7 @@
     
 - **`ai-service/`：AI 服务模块**  
   - 基于SpringAi实现的与deepseek进行角色扮演游戏，支持长期记忆存储与刷新记忆
+  - 基于LangChain4j实现的平台智能助手
     
 
 - **`auth-server/`：认证服务模块**  
@@ -76,7 +77,7 @@ git clone https://github.com/ZixinYan/ML_Platform.git
   - [ ]在Ai-game服务添加更多有意思的Ai体验
   - [ ]支持同学上传源码（在线运行？），并提供通过积分进行下载源码的功能
   - [ ]在Ai-service的角色扮演模块添加语音生成，实现比较真实流畅的对话体验
-
+  - [ ]通过LangChain4j实现本地知识库的制作
 ---
 
 ## 📬 联系
