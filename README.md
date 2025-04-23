@@ -10,9 +10,13 @@
 
 本项目采用微服务架构，各个模块功能明确，职责分离：
 
-- **`ai-chat/`：AI 聊天服务模块**  
+- **`ai-game/`：AI 体验服务模块**  
   - 基于 Kafka + Python 构建模拟大模型提示词攻击靶场  
   - 提供与 Ollama 模型的 API 交互（通过 WebSocket 实现）
+    
+- **`ai-service/`：AI 服务模块**  
+  - 基于SpringAi实现的与deepseek进行角色扮演游戏，支持长期记忆存储与刷新记忆
+    
 
 - **`auth-server/`：认证服务模块**  
   - 使用 Session 实现用户登录鉴权  
@@ -66,8 +70,12 @@ git clone https://github.com/ZixinYan/ML_Platform.git
 - 当前使用的是 Spring Boot 2.x 版本，由于 SpringAI 仅支持 3.x+，部分功能（如 Ollama 接入）使用 WebSocket 自行实现
 - **未来计划：**
   - [√]升级整体架构至 Spring Boot 3.x
-  - [ ]引入 [Spring AI](https://spring.io/projects/spring-ai)，统一支持多模态模型（MCP）如图像/文本输入等
-  - [ ]将项目核心丰富一下
+  - [√]引入 [Spring AI](https://spring.io/projects/spring-ai)
+  - [ ]完善微信登录和微博登录功能
+  - [ ]引入refresh_token做更安全的验证
+  - [ ]在Ai-game服务添加更多有意思的Ai体验
+  - [ ]支持同学上传源码（在线运行？），并提供通过积分进行下载源码的功能
+  - [ ]在Ai-service的角色扮演模块添加语音生成，实现比较真实流畅的对话体验
 
 ---
 
