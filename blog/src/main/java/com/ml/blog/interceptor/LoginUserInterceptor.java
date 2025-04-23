@@ -1,22 +1,17 @@
 package com.ml.blog.interceptor;
 
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ml.common.constant.AuthServerConstant;
 import com.ml.common.exception.BizCodeEnum;
 import com.ml.common.utils.R;
 import com.ml.common.vo.MemberRespVo;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.concurrent.BackgroundInitializer;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import static com.ml.common.constant.AuthServerConstant.SESSION_LOGIN_KEY;
 
 @Component
 @Slf4j
@@ -29,14 +24,12 @@ public class LoginUserInterceptor implements HandlerInterceptor {
         // 获取 Session
         HttpSession session = request.getSession(false);
         if (session == null) {
-            log.warn("Session is missing!");
             // 用户未登录，返回 401 错误
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write(JSON.toJSONString(R.error(401, "请先登录")));
             response.getWriter().flush();
             return false; // 拦截请求
         } else {
-            log.info("Session ID: {}", session.getId());
             MemberRespVo user = (MemberRespVo) session.getAttribute(AuthServerConstant.SESSION_LOGIN_KEY);
             if (user != null) {
                 loginUser.set(user); // 设置到 ThreadLocal 中

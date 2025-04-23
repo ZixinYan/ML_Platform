@@ -1,5 +1,12 @@
 package com.ml.blog.service.impl;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.util.ObjectBuilder;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -16,29 +23,37 @@ import com.ml.blog.interceptor.LoginUserInterceptor;
 import com.ml.blog.service.BlogService;
 import com.ml.blog.constant.RedisConstants;
 import com.ml.blog.constant.SystemConstants;
+import com.ml.blog.vo.BlogSearchVo;
 import com.ml.blog.vo.MemberShowVo;
 import com.ml.common.exception.BizCodeEnum;
 import com.ml.common.utils.PageUtils;
 import com.ml.common.utils.Query;
 import com.ml.common.utils.R;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static co.elastic.clients.elasticsearch._types.SortOrder.Desc;
 
 @Slf4j
 @Service("blogService")
@@ -51,7 +66,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogDao, BlogEntity> implements
     private MemberFeignService memberClient;
 
     @Autowired
-    private ElasticsearchRestTemplate elasticsearchRestTemplate;
+    private ElasticsearchClient elasticsearchClient;
 
     @Autowired
     private BlogSearchRepository blogSearchRepository;
@@ -146,16 +161,19 @@ public class BlogServiceImpl extends ServiceImpl<BlogDao, BlogEntity> implements
         if (blog.getContent() != null) blogToUpdate.setContent(blog.getContent());
         if (blog.getState() != null) blogToUpdate.setState(blog.getState());
         if (blog.getCategoryId() != null) blogToUpdate.setCategoryId(blog.getCategoryId());
-
+        blog.setUpdateTime(new Date());
         // 执行更新
         boolean updated = this.updateById(blogToUpdate);
         if (!updated) {
             log.warn("文章更新失败，id={}, version={}", id, existingBlog.getVersion());
             return false;
         }
-
+        BlogSearchVo blogSearchVo = new BlogSearchVo();
+        blogSearchVo.setId(blogToUpdate.getId());
+        blogSearchVo.setTitle(blogToUpdate.getTitle());
+        blogSearchVo.setContent(blogToUpdate.getContent());
         // 更新 Elasticsearch 中的信息
-        blogSearchRepository.save(blogToUpdate);
+        blogSearchRepository.save(blogSearchVo);
         return true;
     }
 
@@ -223,34 +241,52 @@ public class BlogServiceImpl extends ServiceImpl<BlogDao, BlogEntity> implements
     @Override
     @CacheAdd(key = "'blog:search:' + #current + ':' + #keywords", ttl = 5)
     public PageUtils searchBlog(Integer current, String[] keywords) {
-        // 1. 构建 Bool 查询
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        for (String keyword : keywords) {
-            queryBuilder.should(QueryBuilders.matchQuery("title", keyword));
-            queryBuilder.should(QueryBuilders.matchQuery("content", keyword));
+
+        if (keywords == null || keywords.length == 0) {
+            throw new IllegalArgumentException("Search keywords must not be empty");
+        }
+        if (current == null || current < 1) {
+            current = 1;
         }
 
-        // 2. 构建分页
-        Pageable pageRequest = PageRequest.of(current, SystemConstants.MAX_PAGE_SIZE);
+        // 1. Create Bool query
+        BoolQuery.Builder boolQuery = new BoolQuery.Builder();
+        for (String keyword : keywords) {
+            boolQuery.should(b -> b.match(m -> m.field("title").query(keyword)));
+            boolQuery.should(b -> b.match(m -> m.field("content").query(keyword)));
+        }
 
-        // 3. 构建查询
-        NativeSearchQuery searchQuery = new NativeSearchQuery(queryBuilder);
-        searchQuery.setPageable(pageRequest);
-        searchQuery.addSort(Sort.by(Sort.Order.desc("_score"))); // 按得分排序
+        // 2. Pagination parameters
+        int pageSize = SystemConstants.MAX_PAGE_SIZE;
+        int from = (current - 1) * pageSize;
 
-        // 4. 执行查询
-        SearchHits<BlogEntity> searchHits = elasticsearchRestTemplate.search(searchQuery, BlogEntity.class);
+        // 3. Build query request with sorting by score
+        SearchRequest request = new SearchRequest.Builder()
+                .index("blog")
+                .query(q -> q.bool(boolQuery.build()))
+                .from(from)
+                .size(pageSize)
+                .sort(s -> s.field(f -> f.field("_score").order(SortOrder.Desc))) // Sorting by score in descending order
+                .build();
 
-        // 5. 提取结果数据
-        List<BlogEntity> blogList = searchHits.getSearchHits()
-                .stream()
-                .map(SearchHit::getContent)
+        // 4. Execute query
+        SearchResponse<BlogSearchVo> response;
+        try {
+            response = elasticsearchClient.search(request, BlogSearchVo.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Elasticsearch search failed", e);
+        }
+
+        // 5. Process the query results
+        List<BlogSearchVo> blogList = response.hits().hits().stream()
+                .map(hit -> hit.source())
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        long total = searchHits.getTotalHits();
+        long total = response.hits().total().value();
 
-        // 6. 返回自定义分页结果
-        return new PageUtils(blogList, (int) total, SystemConstants.MAX_PAGE_SIZE, current);
+        // 6. Return paginated result
+        return new PageUtils(blogList, (int) total, pageSize, current);
     }
 
 

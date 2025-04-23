@@ -11,6 +11,7 @@ import com.ml.common.constant.AuthServerConstant;
 import com.ml.common.exception.BizCodeEnum;
 import com.ml.common.utils.R;
 import com.ml.common.vo.MemberRespVo;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.security.SecureRandom;
 import java.util.HashMap;

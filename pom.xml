@@ -15,7 +15,8 @@
 		<module>auth-server</module>
 		<module>third-party</module>
 		<module>gateway</module>
-		<module>ai-chat</module>
+		<module>ai-game</module>
+		<module>ai-service</module>
 		<module>blog</module>
 	</modules>
 

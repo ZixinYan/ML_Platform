@@ -7,7 +7,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-/*
     @Autowired
     private LoginUserInterceptor loginUserInterceptor;
 
@@ -17,6 +16,5 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**");
     }
 
- */
 }
 

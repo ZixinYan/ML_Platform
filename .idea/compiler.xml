@@ -8,19 +8,21 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="common" />
+        <module name="ai-game" />
         <module name="auth-server" />
         <module name="member" />
         <module name="blog" />
         <module name="gateway" />
+        <module name="ai-service" />
         <module name="third-party" />
-        <module name="ai-chat" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_STRING" value="-Djps.track.ap.dependencies=true " />
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="ai-chat" options="" />
+      <module name="ai-game" options="" />
+      <module name="ai-service" options="" />
       <module name="auth-server" options="" />
       <module name="blog" options="" />
       <module name="common" options="" />

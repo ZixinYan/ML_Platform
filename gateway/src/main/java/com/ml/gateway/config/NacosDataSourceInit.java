@@ -7,20 +7,22 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.NacosFactory;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Properties;
 
-@Slf4j
 @Configuration
+@Slf4j
 public class NacosDataSourceInit implements InitFunc {
 
-    private static final String remoteAddress = "192.168.35.128:8848"; // **去掉 `/nacos/v1/cs/configs`**
+    private static final String remoteAddress = "192.168.35.128:8848";
     private static final String groupId = "dev";
     private static final String dataId = "sentinel.flow.rule";
+    private static final String username = "nacos";
+    private static final String password = "nacos";
     private static final String namespaceId = "48126882-0e93-4746-b265-ab232bf8d85e";
 
     @PostConstruct
@@ -55,9 +57,12 @@ public class NacosDataSourceInit implements InitFunc {
         Properties properties = new Properties();
         properties.put("serverAddr", remoteAddress);
         properties.put("namespace", namespaceId); // **显式传递 namespaceId**
+        properties.put("username", username);  // 添加用户名
+        properties.put("password", password);  // 添加密码
 
         return NacosFactory.createConfigService(properties);
     }
 
     public NacosDataSourceInit(){}
+
 }

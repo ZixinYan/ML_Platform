@@ -8,6 +8,7 @@ import com.ml.blog.entity.BlogEntity;
 import com.ml.blog.interceptor.LoginUserInterceptor;
 import com.ml.blog.service.BlogService;
 import com.ml.blog.constant.SystemConstants;
+import com.ml.blog.vo.BlogSearchVo;
 import com.ml.common.utils.PageUtils;
 import com.ml.common.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -113,17 +115,22 @@ public class BlogController {
     }
 
     @PostMapping("/save")
-    @Transactional
     @CacheDelete(keys = {
             "'blog:hot:*'",
             "'blog:search:*'"
     })
     public R save(@RequestBody @Valid BlogEntity blog) {
+        blog.setCreateTime(new Date());
+        blog.setCreateUser(LoginUserInterceptor.loginUser.get().getId());
         boolean result = blogService.save(blog);
         if (!result) {
             return R.error();
         }
-        blogSearchRepository.save(blog);
+        BlogSearchVo blogSearchVo = new BlogSearchVo();
+        blogSearchVo.setId(blog.getId());
+        blogSearchVo.setTitle(blog.getTitle());
+        blogSearchVo.setContent(blog.getContent());
+        blogSearchRepository.save(blogSearchVo);
         return R.ok();
     }
 
@@ -151,7 +158,4 @@ public class BlogController {
         }
 
     }
-
-
-
 }

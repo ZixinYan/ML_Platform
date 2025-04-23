@@ -8,6 +8,7 @@ import com.ml.common.constant.AuthServerConstant;
 import com.ml.common.exception.BizCodeEnum;
 import com.ml.common.utils.R;
 import com.ml.common.vo.MemberRespVo;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -24,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -68,7 +68,7 @@ public class GitHubController {
         String tokenUrl = "https://github.com/login/oauth/access_token?client_id=" + clientID +
                 "&client_secret=" + clientSecret +
                 "&code=" + code +
-                "&redirect_uri=http://localhost:9000/github/success";
+                "&redirect_uri=http://ygnzxydlz.com/api/auth/github/success";
 
         HttpPost tokenRequest = new HttpPost(tokenUrl);
         tokenRequest.setHeader("Accept", "application/json");

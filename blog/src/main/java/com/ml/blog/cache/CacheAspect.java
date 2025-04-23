@@ -214,7 +214,7 @@ public class CacheAspect {
         Cursor<byte[]> cursor = redisTemplate.execute(new RedisCallback<Cursor<byte[]>>() {
             @Override
             public Cursor<byte[]> doInRedis(RedisConnection redisConnection) throws DataAccessException {
-                return  redisConnection.scan(new ScanOptions.ScanOptionsBuilder()
+                return  redisConnection.scan(ScanOptions.scanOptions()
                         .match(KEY_PATTERN)
                         .count(1000)
                         .build());

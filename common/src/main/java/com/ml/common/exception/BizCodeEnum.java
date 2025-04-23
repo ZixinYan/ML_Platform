@@ -26,6 +26,5 @@ public enum BizCodeEnum {
         this.code = code;
         this.msg = msg;
     }
-
 }
 

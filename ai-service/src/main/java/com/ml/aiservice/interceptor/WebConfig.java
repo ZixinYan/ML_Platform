@@ -1,4 +1,4 @@
-package com.ml.aichat.interceptor;
+package com.ml.aiservice.interceptor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -7,7 +7,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
     @Autowired
     private LoginUserInterceptor loginUserInterceptor;
 
@@ -16,5 +15,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginUserInterceptor)
                 .addPathPatterns("/**");
     }
+
 }
 

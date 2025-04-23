@@ -18,8 +18,8 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/chat")
-public class ChatController {
+@RequestMapping("/game")
+public class GameController {
     @Autowired
     private GameServiceImpl gameService;
 

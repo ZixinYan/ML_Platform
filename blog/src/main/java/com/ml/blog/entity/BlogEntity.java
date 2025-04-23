@@ -4,6 +4,7 @@ package com.ml.blog.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import com.ml.blog.anno.State;
 import lombok.Data;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -18,6 +19,7 @@ import java.util.Date;
 @Data
 @TableName("blog_info")
 @Document(indexName = "blog")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BlogEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -63,6 +65,7 @@ public class BlogEntity implements Serializable {
     @TableLogic
     private Integer status;
 
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     @Version
     private Integer version;
 }
