@@ -67,8 +67,6 @@ git clone https://github.com/ZixinYan/ML_Platform.git
 ---
 
 ## 🛠️ 项目未来规划
-
-- 当前使用的是 Spring Boot 2.x 版本，由于 SpringAI 仅支持 3.x+，部分功能（如 Ollama 接入）使用 WebSocket 自行实现
 - **未来计划：**
   - [√]升级整体架构至 Spring Boot 3.x
   - [√]引入 [Spring AI](https://spring.io/projects/spring-ai)
