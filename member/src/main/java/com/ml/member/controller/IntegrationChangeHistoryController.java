@@ -2,12 +2,14 @@ package com.ml.member.controller;
 
 import com.ml.common.utils.PageUtils;
 import com.ml.common.utils.R;
+import com.ml.member.dto.IntegrationChangeHistoryDto;
 import com.ml.member.entity.IntegrationChangeHistoryEntity;
 import com.ml.member.service.IntegrationChangeHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,13 +22,10 @@ public class IntegrationChangeHistoryController {
      * 列表
      */
     @GetMapping("/list")
-    //@RequiresPermissions("member:integrationchangehistory:list")
-    public R list(@RequestParam Map<String, Object> params){
-        PageUtils page = integrationChangeHistoryService.queryPage(params);
-
-        return R.ok(page);
+    public R list(@RequestParam("memberId") Long memberId) {
+        List<IntegrationChangeHistoryDto> list = integrationChangeHistoryService.listByMemberId(memberId);
+        return R.ok(list);
     }
-
 
     /**
      * 信息

@@ -1,4 +1,4 @@
-package com.ml.aiservice.config;
+package com.ml.agent.memory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.messages.*;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.serializer.RedisSerializer;
-
-import java.nio.charset.StandardCharsets;
 
 @Configuration
 public class MessageRedisSerializer implements RedisSerializer<Message> {

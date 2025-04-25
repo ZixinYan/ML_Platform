@@ -7,6 +7,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="agent" />
         <module name="common" />
         <module name="ai-game" />
         <module name="auth-server" />
@@ -21,8 +22,9 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_STRING" value="-Djps.track.ap.dependencies=true " />
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="agent" options="" />
       <module name="ai-game" options="" />
-      <module name="ai-service" options="" />
+      <module name="ai-service" options="-parameters" />
       <module name="auth-server" options="" />
       <module name="blog" options="" />
       <module name="common" options="" />

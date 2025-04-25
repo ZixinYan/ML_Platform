@@ -1,12 +1,10 @@
-package com.ml.aiservice.interceptor;
+package com.ml.agent.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.ml.common.constant.AuthServerConstant;
 import com.ml.common.exception.BizCodeEnum;
 import com.ml.common.utils.R;
 import com.ml.common.vo.MemberRespVo;
-import dev.langchain4j.service.spring.AiService;
-import dev.langchain4j.service.spring.AiServiceWiringMode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;

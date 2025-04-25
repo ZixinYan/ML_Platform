@@ -17,6 +17,7 @@
 		<module>gateway</module>
 		<module>ai-game</module>
 		<module>ai-service</module>
+		<module>agent</module>
 		<module>blog</module>
 	</modules>
 
