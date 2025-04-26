@@ -11,7 +11,7 @@ import reactor.core.publisher.Flux;
 @AiService(
         wiringMode = AiServiceWiringMode.EXPLICIT,
         chatMemoryProvider = "assistantMemoryProvider",
-        streamingChatModel = "deepseek-chat",
+        streamingChatModel = "qwen",
         tools = "tools",
         contentRetriever = "contentRetriever"
 )

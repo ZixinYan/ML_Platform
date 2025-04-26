@@ -44,7 +44,6 @@ public class AssistantMemory implements ChatMemoryStore {
     @Override
     public List<ChatMessage> getMessages(Object chatId) {
         String key = buildKey(chatId);
-        log.info("Fetching messages for chatId: {}", key);
 
         // Create a query with the criteria
         Criteria criteria = Criteria.where("chatId").is(key);
@@ -74,7 +73,6 @@ public class AssistantMemory implements ChatMemoryStore {
     @Override
     public void updateMessages(Object o, List<ChatMessage> list) {
         String key = buildKey(o);
-        log.info("updateMessages key: {}, messages: {}", key, list);
         Criteria criteria = Criteria.where("chatId").is(key);
         Query query = new Query(criteria);
         Update update = new Update();
@@ -121,7 +119,6 @@ public class AssistantMemory implements ChatMemoryStore {
         // 为 ChatMessages 类创建索引
         mongoTemplate.indexOps(ChatMessages.class).ensureIndex(index);
     }
-
 
     @PostConstruct
     public void init() {

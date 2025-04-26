@@ -28,11 +28,11 @@ public class AssistantConfig {
     @Autowired
     private AssistantMemory assistantMemory;
 
-    //@Autowired
-    //private EmbeddingStore embeddingStore;
+    @Autowired
+    private EmbeddingStore embeddingStore;
 
-    //@Autowired
-    //private EmbeddingModel embeddingModel;
+    @Autowired
+    private EmbeddingModel embeddingModel;
 
     @Bean(name = "assistantMemoryProvider")
     public ChatMemoryProvider assistantMemoryProvider(){
@@ -47,6 +47,7 @@ public class AssistantConfig {
      * 创建本地一个内存聊天存储
      * @return
      */
+    /*
     @Bean(name = "contentRetriever")
     public ContentRetriever contentRetriever() {
         // 从 classpath 获取资源文件并转换为真实的 File path
@@ -61,12 +62,14 @@ public class AssistantConfig {
         return EmbeddingStoreContentRetriever.from(embeddingStore);
     }
 
+     */
+
 
 
     /**
      * 創建pinecone向量數據庫
      */
-    /*
+
     @Bean(name = "contentRetriever")
     public ContentRetriever contentRetriever(){
         return EmbeddingStoreContentRetriever
@@ -77,6 +80,4 @@ public class AssistantConfig {
                 .minScore(0.7) // 最小分数
                 .build();
     }
-
-     */
 }

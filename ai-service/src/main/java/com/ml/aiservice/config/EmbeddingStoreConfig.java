@@ -1,6 +1,7 @@
 package com.ml.aiservice.config;
 
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.pinecone.PineconeEmbeddingStore;
 import dev.langchain4j.store.embedding.pinecone.PineconeServerlessIndexConfig;
@@ -22,6 +23,9 @@ public class EmbeddingStoreConfig {
     @Value("${vector.pinecone.namespace}")
     private String pineconeNameSpace;
 
+    @Autowired
+    private EmbeddingModel embeddingModel;
+
     @Bean
     public EmbeddingStore<TextSegment> embeddingStore(){
         return PineconeEmbeddingStore.builder()
@@ -31,7 +35,7 @@ public class EmbeddingStoreConfig {
                 .createIndex(PineconeServerlessIndexConfig.builder()
                         .cloud("AWS")
                         .region("us-east-1")
-                        .dimension(1536)
+                        .dimension(embeddingModel.dimension())
                         .build())
                 .build();
     }

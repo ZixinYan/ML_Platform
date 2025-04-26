@@ -10,6 +10,7 @@ import com.ml.aiservice.memory.AssistantMemory;
 import com.ml.aiservice.utils.MessageUtils;
 import com.ml.common.utils.R;
 import dev.langchain4j.data.message.*;
+import dev.langchain4j.model.embedding.EmbeddingModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +38,11 @@ public class AssistantController {
     @Autowired
     private AssistantMemory assistantMemory;
 
-
     @Autowired
     private AssistantService assistantService;
+
+    @Autowired
+    private EmbeddingModel embeddingModel;
 
     /**
      * 创建一个新的对话
@@ -127,7 +130,6 @@ public class AssistantController {
     /**
      * 上傳文件到向量數據庫
      */
-    /*
     @PostMapping("/upload")
     public R uploadFiles(@RequestParam("files") MultipartFile[] multipartFiles) {
         try {
@@ -151,6 +153,4 @@ public class AssistantController {
             return R.error();
         }
     }
-
-     */
 }

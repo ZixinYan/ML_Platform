@@ -21,20 +21,19 @@ import java.util.stream.Collectors;
 public class AssistantServiceImpl implements AssistantService {
 
 
-    /*
+
     @Autowired
     private EmbeddingStore<TextSegment> embeddingStore;
 
     @Autowired
     private EmbeddingModel embeddingModel;
 
-     */
 
     /**
      * 上传知识库
      * @param files
      */
-    /*
+
     @Override
     public void uploadKnowledgeLibrary(File[] files) {
         if (files == null || files.length == 0) {
@@ -57,12 +56,12 @@ public class AssistantServiceImpl implements AssistantService {
                 .ingest(documents);
     }
 
-     */
+
 
     /**
      * 重新上传（覆盖）某个文档
      */
-    /*
+
     @Override
     public void reUploadKnowledge(String documentId, File file) {
         // 1. 删除原来对应的向量（如果 embeddingStore 支持删除）
@@ -81,6 +80,6 @@ public class AssistantServiceImpl implements AssistantService {
                 .build()
                 .ingest(Collections.singletonList(document));
     }
-    */
+
 }
 
