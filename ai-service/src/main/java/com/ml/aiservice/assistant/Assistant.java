@@ -12,10 +12,10 @@ import reactor.core.publisher.Flux;
         wiringMode = AiServiceWiringMode.EXPLICIT,
         chatMemoryProvider = "assistantMemoryProvider",
         streamingChatModel = "deepseek-chat",
-        tools = "tools"
+        tools = "tools",
+        contentRetriever = "contentRetriever"
 )
 public interface Assistant {
-
     @SystemMessage(fromResource = "assistant_prompt.txt")
     Flux<String> chat(@MemoryId String chatId, @UserMessage String message, @V("userName") String userName, @V("userId") String userID);
 }

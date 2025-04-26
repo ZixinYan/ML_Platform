@@ -42,7 +42,7 @@ public class Tools {
         return Math.sqrt(a);
     }
 
-    @Tool(name = "get_user_integration_history", value = "根据提供的用户信息，查询用户的积分活动记录，并返回给用户")
+    @Tool(name = "get_user_integration_history", value = "根据提供的用户信息，通过数据库查询用户的积分活动记录，并把详细信息返回给用户")
     public String getRecord(
             @P(value = "用户ID") String userId,
             @P(value = "用户姓名") String userName) {

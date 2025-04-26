@@ -111,11 +111,6 @@ public class AssistantMemory implements ChatMemoryStore {
         return chatMessages.stream().map(ChatMessages::getChatId).collect(Collectors.toList());
     }
 
-
-
-
-
-
     // TTL
     public void createTTLIndex() {
         // 创建 TTL 索引，设置 lastUpdatedTime 字段在 10 天后过期

@@ -1,6 +1,8 @@
 package com.ml.aiservice.controller;
 
 
+import com.ml.aiservice.Serivce.AssistantService;
+import com.ml.aiservice.Serivce.impl.AssistantServiceImpl;
 import com.ml.aiservice.assistant.Assistant;
 import com.ml.aiservice.dto.ChatHistoryDto;
 import com.ml.aiservice.interceptor.LoginUserInterceptor;
@@ -11,10 +13,14 @@ import dev.langchain4j.data.message.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import static com.ml.aiservice.utils.MessageUtils.extractText;
@@ -30,6 +36,11 @@ public class AssistantController {
 
     @Autowired
     private AssistantMemory assistantMemory;
+
+
+    @Autowired
+    private AssistantService assistantService;
+
     /**
      * 创建一个新的对话
      */
@@ -39,7 +50,7 @@ public class AssistantController {
             // 初始化聊天信息，存储新的聊天记录
             String userId = String.valueOf(LoginUserInterceptor.loginUser.get().getId());
             String chatId = userId + ":" + UUID.randomUUID();
-            return R.ok(chatId);
+            return R.ok("success",chatId);
         } catch (Exception e) {
             log.error("新建对话失败: ", e);
             return R.error();
@@ -112,4 +123,34 @@ public class AssistantController {
             return R.error();
         }
     }
+
+    /**
+     * 上傳文件到向量數據庫
+     */
+    /*
+    @PostMapping("/upload")
+    public R uploadFiles(@RequestParam("files") MultipartFile[] multipartFiles) {
+        try {
+            File[] files = Arrays.stream(multipartFiles)
+                    .map(multipartFile -> {
+                        try {
+                            String random = String.valueOf(UUID.randomUUID());
+                            File tempFile = File.createTempFile(random, multipartFile.getOriginalFilename());
+                            multipartFile.transferTo(tempFile);
+                            return tempFile;
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .toArray(File[]::new);
+
+            assistantService.uploadKnowledgeLibrary(files);
+            return R.ok("文件已成功上传并入库！");
+        } catch (Exception e) {
+            log.error(e.toString());
+            return R.error();
+        }
+    }
+
+     */
 }
