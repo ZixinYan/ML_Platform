@@ -19,6 +19,9 @@
 		<module>ai-service</module>
 		<module>agent</module>
 		<module>blog</module>
+		<module>code-hub</module>
+		<module>order</module>
+		<module>ml-pay</module>
 	</modules>
 
 </project>

@@ -10,12 +10,14 @@
         <module name="agent" />
         <module name="common" />
         <module name="ai-game" />
+        <module name="code-hub" />
         <module name="auth-server" />
         <module name="member" />
         <module name="blog" />
         <module name="gateway" />
         <module name="ai-service" />
         <module name="third-party" />
+        <module name="order" />
       </profile>
     </annotationProcessing>
   </component>
@@ -27,10 +29,12 @@
       <module name="ai-service" options="-parameters" />
       <module name="auth-server" options="" />
       <module name="blog" options="" />
+      <module name="code-hub" options="-parameters" />
       <module name="common" options="" />
       <module name="gateway" options="" />
       <module name="member" options="" />
       <module name="ml-platform" options="" />
+      <module name="order" options="" />
       <module name="third-party" options="" />
     </option>
   </component>

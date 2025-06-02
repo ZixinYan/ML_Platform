@@ -94,7 +94,7 @@ git clone https://github.com/ZixinYan/ML_Platform.git
 
 🔲 在 Ai-game 服务添加更多有意思的 Ai 体验
 
-🔲 支持同学上传源码（在线运行？），并提供通过积分进行下载源码的功能
+🔲 支持同学上传源码（在线运行？）
 
 🔲 在 agent添加更多功能，语音识别等
 
@@ -103,6 +103,12 @@ git clone https://github.com/ZixinYan/ML_Platform.git
 ✅ 实现平台智能助手
 
 ✅ 添加RAG增强检索和Embedding数据库
+
+🔲 添加代码商城功能，支持高并发秒杀
+
+🔲 为智能助手添加记忆更新功能，以blog等数据为知识实时更新
+
+🔲 为代码商城添加下单支付模块，添加风控系统
 
 🚀 **大改**
 

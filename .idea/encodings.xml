@@ -15,12 +15,15 @@
     <file url="file://$PROJECT_DIR$/auth/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/blog/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/blog/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/code-hub/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/common/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/common/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/gateway/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/member/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/member/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/order/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/order/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/third-party/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/third-party/src/main/resources" charset="UTF-8" />

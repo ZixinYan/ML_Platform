@@ -23,6 +23,8 @@
         <option value="$PROJECT_DIR$/ai-chat/pom.xml" />
         <option value="$PROJECT_DIR$/ai-service/pom.xml" />
         <option value="$PROJECT_DIR$/agent/pom.xml" />
+        <option value="$PROJECT_DIR$/order/pom.xml" />
+        <option value="$PROJECT_DIR$/code-hub/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
