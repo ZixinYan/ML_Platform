@@ -11,6 +11,7 @@ import com.ml.aiservice.utils.MessageUtils;
 import com.ml.common.utils.R;
 import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import jakarta.servlet.http.HttpServlet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,14 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 
 import static com.ml.aiservice.utils.MessageUtils.extractText;
 
@@ -30,7 +35,7 @@ import static com.ml.aiservice.utils.MessageUtils.extractText;
 @Slf4j
 @RequestMapping("/service/assistant")
 @RequiredArgsConstructor
-public class AssistantController {
+public class AssistantController extends HttpServlet {
 
     @Autowired
     private Assistant assistant;
@@ -43,6 +48,9 @@ public class AssistantController {
 
     @Autowired
     private EmbeddingModel embeddingModel;
+
+    @Autowired
+    private Scheduler assistantScheduler;
 
     /**
      * 创建一个新的对话
@@ -64,12 +72,15 @@ public class AssistantController {
      * 继续一次聊天对话（流式返回响应内容）
      */
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> chat(@RequestParam("chatId") String chatId, @RequestParam("message") String message) {
+    public Flux<String> chat(@RequestParam("chatId") String chatId,
+                             @RequestParam("message") String message) {
         String userName = LoginUserInterceptor.loginUser.get().getNickname();
         String userId = String.valueOf(LoginUserInterceptor.loginUser.get().getId());
-        return assistant.chat(chatId, message, userName, userId);
-    }
 
+        return Mono.fromCallable(() -> assistant.chat(chatId, message, userName, userId))
+                .subscribeOn(assistantScheduler)
+                .flatMapMany(Function.identity());
+    }
 
     /**
      * 获取聊天记录

@@ -8,7 +8,9 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import dev.langchain4j.store.embedding.pinecone.PineconeEmbeddingStore;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -20,7 +22,8 @@ import java.util.stream.Collectors;
 @Service
 public class AssistantServiceImpl implements AssistantService {
 
-
+    @Resource(name = "AIServiceExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired
     private EmbeddingStore<TextSegment> embeddingStore;
@@ -39,21 +42,24 @@ public class AssistantServiceImpl implements AssistantService {
         if (files == null || files.length == 0) {
             throw new IllegalArgumentException("文件不能为空");
         }
+        // 异步处理文件上传
+        taskExecutor.submit(() -> {
+                    List<Document> documents = Arrays.stream(files)
+                            .map(file -> {
+                                Document doc = FileSystemDocumentLoader.loadDocument(file.getAbsolutePath());
+                                // 来源文件名
+                                doc.metadata().put("source", file.getName());
+                                return doc;
+                            })
+                            .collect(Collectors.toList());
 
-        List<Document> documents = Arrays.stream(files)
-                .map(file -> {
-                    Document doc = FileSystemDocumentLoader.loadDocument(file.getAbsolutePath());
-                    // 来源文件名
-                    doc.metadata().put("source", file.getName());
-                    return doc;
-                })
-                .collect(Collectors.toList());
+                    EmbeddingStoreIngestor.builder()
+                            .embeddingStore(embeddingStore)
+                            .embeddingModel(embeddingModel)
+                            .build()
+                            .ingest(documents);
+                });
 
-        EmbeddingStoreIngestor.builder()
-                .embeddingStore(embeddingStore)
-                .embeddingModel(embeddingModel)
-                .build()
-                .ingest(documents);
     }
 
 
@@ -64,21 +70,24 @@ public class AssistantServiceImpl implements AssistantService {
 
     @Override
     public void reUploadKnowledge(String documentId, File file) {
-        // 1. 删除原来对应的向量（如果 embeddingStore 支持删除）
-        if (embeddingStore instanceof PineconeEmbeddingStore pineconeStore) {
-            pineconeStore.remove(documentId);
-        }
+        
+        taskExecutor.submit(()->{
+            // 1. 删除原来对应的向量（如果 embeddingStore 支持删除）
+            if (embeddingStore instanceof PineconeEmbeddingStore pineconeStore) {
+                pineconeStore.remove(documentId);
+            }
 
-        // 2. 加载新文件
-        Document document = FileSystemDocumentLoader.loadDocument(file.getAbsolutePath());
-        document.metadata().put("source", file.getName());
+            // 2. 加载新文件
+            Document document = FileSystemDocumentLoader.loadDocument(file.getAbsolutePath());
+            document.metadata().put("source", file.getName());
 
-        // 3. 重新上传
-        EmbeddingStoreIngestor.builder()
-                .embeddingStore(embeddingStore)
-                .embeddingModel(embeddingModel)
-                .build()
-                .ingest(Collections.singletonList(document));
+            // 3. 重新上传
+            EmbeddingStoreIngestor.builder()
+                    .embeddingStore(embeddingStore)
+                    .embeddingModel(embeddingModel)
+                    .build()
+                    .ingest(Collections.singletonList(document));
+        });
     }
 
 }

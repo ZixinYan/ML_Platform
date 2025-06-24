@@ -57,6 +57,27 @@
             <artifactId>lombok</artifactId>
             <version>1.18.30</version> <!-- 建议使用最新稳定版 -->
         </dependency>
+        <!-- Druid 数据库连接池，在更新3.x后废弃
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.2.20</version>
+        </dependency>
+        !-->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>p6spy</groupId>
+            <artifactId>p6spy</artifactId>
+            <version>3.9.1</version>
+        </dependency>
+
+
 
         <dependency>
             <groupId>cn.hutool</groupId>

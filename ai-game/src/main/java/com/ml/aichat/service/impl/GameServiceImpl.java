@@ -8,15 +8,18 @@ import com.ml.aichat.service.GameService;
 import com.ml.aichat.vo.GrowthChangeHistoryVo;
 import com.ml.aichat.vo.IntegrationChangeHistoryVo;
 import com.ml.aichat.vo.MemberVo;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 @Slf4j
@@ -33,6 +36,9 @@ public class GameServiceImpl implements GameService {
 
     @Autowired
     private RedisTemplate<String,String> redisTemplate;
+
+    @Resource(name = "AIGameExecutor")
+    private ThreadPoolExecutor executor;
 
     @Value("${game.integration}")
     private int integration;
@@ -56,42 +62,42 @@ public class GameServiceImpl implements GameService {
         return true;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean success(String requestId, String flag) {
         String realFlag = redisTemplate.opsForValue().get(requestId);
-        if (realFlag == null) {
-            log.info("会话错误");
-            return false;
-        }
-
-        if (!realFlag.equals(flag)) {
+        if (realFlag == null || !realFlag.equals(flag)) {
             log.warn("Flag 验证失败！");
             return false;
         }
+
         Long memberId = LoginUserInterceptor.loginUser.get().getId();
         R r = memberFeignService.getMemberById(memberId);
         if (r == null || r.getCode() != 0) {
-            log.error("远程调用失败，无法获取用户信息: memberId={}", memberId);
+            log.error("远程调用失败: memberId={}", memberId);
             return false;
         }
+
         MemberVo memberVo = objectMapper.convertValue(r.getData(), MemberVo.class);
         if (memberVo == null) {
             log.error("用户不存在: requestId={}, memberId={}", requestId, memberId);
             return false;
         }
 
-        // 记录积分变更历史
+        // 三个操作都在当前事务中执行
         if (!updateMemberInfo(memberVo, integration, growth)) {
-            return false;
+            throw new RuntimeException("更新用户信息失败");
         }
 
-        // 记录成长值变更历史
         if (!saveGrowthHistory(memberId, growth)) {
-            return false;
+            throw new RuntimeException("记录成长值失败");
         }
 
-        // 更新用户的成长值和积分（累加）
-        return saveIntegrationHistory(memberId, integration);
+        if (!saveIntegrationHistory(memberId, integration)) {
+            throw new RuntimeException("记录积分失败");
+        }
+
+        return true;
     }
 
     /**
