@@ -7,18 +7,18 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="ml-pay" />
         <module name="agent" />
+        <module name="ml-pay" />
         <module name="ai-game" />
-        <module name="code-hub" />
         <module name="common" />
+        <module name="code-hub" />
         <module name="auth-server" />
         <module name="member" />
         <module name="blog" />
         <module name="ai-service" />
         <module name="gateway" />
-        <module name="order" />
         <module name="third-party" />
+        <module name="order" />
       </profile>
     </annotationProcessing>
   </component>
