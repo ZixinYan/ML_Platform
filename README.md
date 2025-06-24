@@ -84,11 +84,7 @@ git clone https://github.com/ZixinYan/ML_Platform.git
 ---
 
 ## 🛠️ 项目未来规划
-🚀 **未来计划**
-
-✅ 升级整体架构至 Spring Boot 3.x
-
-✅ 引入 Spring AI
+🚀 **业务相关计划**
 
 🔲 完善微信登录和微博登录功能
 
@@ -104,15 +100,23 @@ git clone https://github.com/ZixinYan/ML_Platform.git
 
 ✅ 添加RAG增强检索和Embedding数据库
 
-🔲 添加代码商城功能，支持高并发秒杀
+🔲 添加代码商城功能，集成高并发秒杀
 
 🔲 为智能助手添加记忆更新功能，以blog等数据为知识实时更新
 
 🔲 为代码商城添加下单支付模块，添加风控系统
 
-🚀 **大改**
+🚀 **系统功能计划**
+
+✅ 升级整体架构至 Spring Boot 3.x
+
+✅ 引入 Spring AI
 
 🔲 通过 Spring security + 双token实现分权【现在是spring session】
+
+🔲 微服务间通信使用rpc
+
+🔲 使用db连接池与线程池减少系统开销
 
 
 ---
