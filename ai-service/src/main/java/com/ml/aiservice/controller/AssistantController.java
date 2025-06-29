@@ -2,12 +2,10 @@ package com.ml.aiservice.controller;
 
 
 import com.ml.aiservice.Serivce.AssistantService;
-import com.ml.aiservice.Serivce.impl.AssistantServiceImpl;
 import com.ml.aiservice.assistant.Assistant;
 import com.ml.aiservice.dto.ChatHistoryDto;
 import com.ml.aiservice.interceptor.LoginUserInterceptor;
 import com.ml.aiservice.memory.AssistantMemory;
-import com.ml.aiservice.utils.MessageUtils;
 import com.ml.common.utils.R;
 import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.embedding.EmbeddingModel;
@@ -15,7 +13,6 @@ import jakarta.servlet.http.HttpServlet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.ml.aiservice.utils.MessageUtils.extractText;
 
@@ -86,43 +84,38 @@ public class AssistantController extends HttpServlet {
      * 获取聊天记录
      */
     @GetMapping("/history")
-    public R getHistory(@RequestParam String chatId) {
-        List<ChatMessage> messages = assistantMemory.getMessages(chatId);
-        List<ChatHistoryDto.ChatMessageDto> dtoList = new ArrayList<>();
-
-        for (ChatMessage message : messages) {
-            String role = "unknown";
-            String content = null;
-            if (message instanceof UserMessage userMsg) {
-                role = "user";
-                if (!userMsg.contents().isEmpty()) {
+    public Mono<R<ChatHistoryDto>> getHistory(@RequestParam String chatId) {
+        return Mono.fromCallable(() -> {
+            List<ChatMessage> messages = assistantMemory.getMessages(chatId);
+            List<ChatHistoryDto.ChatMessageDto> dtoList = messages.stream().map(message -> {
+                String role = "unknown";
+                String content = null;
+                if (message instanceof UserMessage userMsg && !userMsg.contents().isEmpty()) {
+                    role = "user";
                     content = extractText(userMsg.contents().get(0).toString());
+                } else if (message instanceof AiMessage aiMsg) {
+                    role = "assistant";
+                    content = extractText(aiMsg.toString());
                 }
-            } else if (message instanceof AiMessage aiMsg) {
-                role = "assistant";
-                content = extractText(aiMsg.toString());
-            } else {
-                continue;
-            }
+                return new ChatHistoryDto.ChatMessageDto(role, content);
+            }).filter(msg -> msg.getContent() != null).collect(Collectors.toList());
 
-            dtoList.add(new ChatHistoryDto.ChatMessageDto(role, content));
-
-        }
-
-        ChatHistoryDto chatHistoryDto = new ChatHistoryDto();
-        chatHistoryDto.setMessages(dtoList);
-        return R.ok("success", chatHistoryDto);
+            ChatHistoryDto chatHistoryDto = new ChatHistoryDto();
+            chatHistoryDto.setMessages(dtoList);
+            return R.ok("success", chatHistoryDto);
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     /**
      * 所有聊天记录
      */
     @GetMapping("/all")
-    public R getAllHistory() {
-        List<String> chatIds = assistantMemory.findChatIdsByUserId(String.valueOf(LoginUserInterceptor.loginUser.get().getId()));
-        return R.ok("success", chatIds);
+    public Mono<R<List<String>>> getAllHistory() {
+        return Mono.fromCallable(() -> {
+            List<String> chatIds = assistantMemory.findChatIdsByUserId(String.valueOf(LoginUserInterceptor.loginUser.get().getId()));
+            return R.ok("success", chatIds);
+        }).subscribeOn(Schedulers.boundedElastic());
     }
-
 
     /**
      * 删除聊天记录
@@ -142,26 +135,24 @@ public class AssistantController extends HttpServlet {
      * 上傳文件到向量數據庫
      */
     @PostMapping("/upload")
-    public R uploadFiles(@RequestParam("files") MultipartFile[] multipartFiles) {
-        try {
-            File[] files = Arrays.stream(multipartFiles)
-                    .map(multipartFile -> {
-                        try {
-                            String random = String.valueOf(UUID.randomUUID());
-                            File tempFile = File.createTempFile(random, multipartFile.getOriginalFilename());
-                            multipartFile.transferTo(tempFile);
-                            return tempFile;
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .toArray(File[]::new);
-
-            assistantService.uploadKnowledgeLibrary(files);
-            return R.ok("文件已成功上传并入库！");
-        } catch (Exception e) {
-            log.error(e.toString());
-            return R.error();
-        }
+    public Mono<R<Object>> uploadFiles(@RequestParam("files") MultipartFile[] multipartFiles) {
+        return Mono.fromCallable(() -> {
+                    File[] files = Arrays.stream(multipartFiles)
+                            .map(multipartFile -> {
+                                try {
+                                    File tempFile = File.createTempFile(UUID.randomUUID().toString(), multipartFile.getOriginalFilename());
+                                    multipartFile.transferTo(tempFile);
+                                    return tempFile;
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }).toArray(File[]::new);
+                    assistantService.uploadKnowledgeLibrary(files);
+                    return R.ok("success");
+                }).subscribeOn(Schedulers.boundedElastic())
+                .onErrorResume(e -> {
+                    log.error("文件已成功上传并入库！: ", e);
+                    return Mono.just(R.error());
+                });
     }
 }

@@ -7,10 +7,14 @@ import com.ml.common.utils.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.UUID;
 
@@ -27,6 +31,10 @@ import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvis
 @Slf4j
 public class ChatController {
     private final ChatClient chatClient;
+
+    @Autowired
+    @Qualifier("chatWorkerScheduler")
+    private Scheduler chatScheduler;
 
     @Autowired
     private final MessageRedisSerializer messageRedisSerializer;
@@ -63,28 +71,36 @@ public class ChatController {
     public ResponseEntity<Flux<String>> chatStream(
             @RequestParam("chatId") String chatId,
             @RequestParam("message") String message) {
+
         try {
-            Flux<String> response = chatClient.prompt()
-                    .user(message)
-                    .advisors(advisor -> advisor
-                            .param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-                            .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
-                    .stream().content();
+            Flux<String> response = Mono.defer(() -> Mono.just(
+                    chatClient.prompt()
+                            .user(message)
+                            .advisors(advisor -> advisor
+                                    .param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                                    .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
+                            .stream().content()
+            )).subscribeOn(chatScheduler).flatMapMany(f -> f);
+
             return ResponseEntity.ok()
                     .contentType(MediaType.TEXT_EVENT_STREAM)
                     .body(response);
+
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("Chat failed", e);
             return ResponseEntity.internalServerError().build();
         }
     }
+
 
     /**
      * 获取历史记录
      */
     @GetMapping("/getMessages")
-    public R getMessages(@RequestParam("chatId") String chatId) {
-        return R.ok(agentMemory.get(chatId, 20));
+    public Mono<R> getMessages(@RequestParam("chatId") String chatId) {
+        return Mono.fromCallable(() -> agentMemory.get(chatId, 20))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(R::ok);
     }
 
 
@@ -92,9 +108,11 @@ public class ChatController {
      * 获取全部历史记录
      */
     @GetMapping("/getAllMessages")
-    public R getAllMessages() {
+    public Mono<R> getAllMessages() {
         String userId = String.valueOf(LoginUserInterceptor.loginUser.get().getId());
-        return R.ok(agentMemory.getAllByUserId(userId));
+        return Mono.fromCallable(() -> agentMemory.getAllByUserId(userId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(R::ok);
     }
 
 
