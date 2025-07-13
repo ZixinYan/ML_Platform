@@ -289,11 +289,6 @@ public class BlogServiceImpl extends ServiceImpl<BlogDao, BlogEntity> implements
         return new PageUtils(blogList, (int) total, pageSize, current);
     }
 
-
-
-
-
-
     private void isBlogLiked(BlogEntity blog) {
         Long userId = LoginUserInterceptor.loginUser.get().getId();
         //判断当前用户时候点赞
