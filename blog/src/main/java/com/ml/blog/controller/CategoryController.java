@@ -3,6 +3,7 @@ package com.ml.blog.controller;
 import com.ml.blog.entity.CategoryEntity;
 import com.ml.blog.service.CategoryService;
 import com.ml.common.utils.R;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
