@@ -11,10 +11,6 @@ package com.ml.common.xss;
 import com.ml.common.exception.RRException;
 import org.apache.commons.lang.StringUtils;
 
-/**
- *
- * @author yaoxinjia
- */
 public class SQLFilter {
 
     /**
@@ -39,11 +35,10 @@ public class SQLFilter {
 
         //判断是否包含非法字符
         for(String keyword : keywords){
-            if(str.indexOf(keyword) != -1){
+            if(str.contains(keyword)){
                 throw new RRException("包含非法字符");
             }
         }
-
         return str;
     }
 }
