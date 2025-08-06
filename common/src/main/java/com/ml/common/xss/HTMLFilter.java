@@ -7,10 +7,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- *
- * @author yaoxinjia
- */
 public final class HTMLFilter {
 
     /** regex flag union representing /si modifiers in php **/
@@ -322,7 +318,7 @@ public final class HTMLFilter {
 
             //debug( "in a starting tag, name='" + name + "'; body='" + body + "'; ending='" + ending + "'" );
             if (allowed(name)) {
-                String params = "";
+                StringBuilder params = new StringBuilder();
 
                 final Matcher m2 = P_QUOTED_ATTRIBUTES.matcher(body);
                 final Matcher m3 = P_UNQUOTED_ATTRIBUTES.matcher(body);
@@ -350,7 +346,7 @@ public final class HTMLFilter {
                         if (inArray(paramName, vProtocolAtts)) {
                             paramValue = processParamProtocol(paramValue);
                         }
-                        params += " " + paramName + "=\"" + paramValue + "\"";
+                        params.append(" ").append(paramName).append("=\"").append(paramValue).append("\"");
                     }
                 }
 
@@ -362,7 +358,7 @@ public final class HTMLFilter {
                     ending = "";
                 }
 
-                if (ending == null || ending.length() < 1) {
+                if (ending == null || ending.isEmpty()) {
                     if (vTagCounts.containsKey(name)) {
                         vTagCounts.put(name, vTagCounts.get(name) + 1);
                     } else {
