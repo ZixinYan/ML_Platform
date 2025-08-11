@@ -204,4 +204,26 @@ public class DateUtils {
     public static LocalDate parseDate(String dateStr, String pattern) {
         return LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(pattern));
     }
+
+    /**
+     * 获取昨天的日期字符串（默认格式）
+     */
+    public static String getYesterdayStr() {
+        return formatDate(LocalDate.now().minusDays(1));
+    }
+
+    /**
+     * 获取上月字符串 (yyyyMM)
+     */
+    public static String getLastMonthStr(String format) {
+        return LocalDate.now().minusMonths(1).format(DateTimeFormatter.ofPattern(format));
+    }
+
+    /**
+     * 获取某日期是当月第几天 (1-31)
+     * @param dateStr
+     */
+    public static int getDayOfMonth(String dateStr) {
+        return LocalDate.parse(dateStr).getDayOfMonth();
+    }
 }
