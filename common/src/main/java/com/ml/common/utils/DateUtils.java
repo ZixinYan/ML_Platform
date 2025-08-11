@@ -103,8 +103,8 @@ public class DateUtils {
 
     /**
      * 获取两个日期之间的所有日期字符串（默认格式）
-     * @param start 开始日期字符串（格式：yyyy-MM-dd）
-     * @param end 结束日期字符串（格式：yyyy-MM-dd）
+     * @param start 开始日期字符串（格式：yyyyMMdd）
+     * @param end 结束日期字符串（格式：yyyyMMdd）
      * @return 日期字符串列表
      */
     public static List<String> getDateStringsBetween(String start, String end) {

@@ -15,7 +15,7 @@ public class MemberDaySignEntity implements Serializable {
     @TableId
     private Long memberId;
     /**
-     * 签到日期
+     * 签到日期(yyyyMMdd)
      */
     private String signDate;
     /**
@@ -32,4 +32,9 @@ public class MemberDaySignEntity implements Serializable {
     private Integer signStatus;
 
 
+    public MemberDaySignEntity(Long memberId, String signDate, int signStatus) {
+        this.memberId = memberId;
+        this.signDate = signDate;
+        this.signStatus = signStatus;
+    }
 }
