@@ -17,39 +17,24 @@
       <option name="url" value="https://repo.maven.apache.org/maven2" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="aliyun" />
+      <option name="name" value="Aliyun Maven" />
+      <option name="url" value="https://maven.aliyun.com/repository/public" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="alibaba" />
       <option name="name" value="alibaba" />
+      <option name="url" value="https://maven.aliyun.com/repository/public" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="aliyun" />
+      <option name="name" value="Alibaba Cloud Repository" />
       <option name="url" value="https://maven.aliyun.com/repository/public" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Maven Central repository" />
       <option name="url" value="https://repo1.maven.org/maven2" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="aliyun" />
-      <option name="name" value="Aliyun Maven" />
-      <option name="url" value="https://maven.aliyun.com/repository/public" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="alibaba" />
-      <option name="name" value="alibaba" />
-      <option name="url" value="http://218.61.32.122:8081/repository/maven-public/" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="aliyun" />
-      <option name="name" value="Aliyun Maven" />
-      <option name="url" value="http://218.61.32.122:8081/repository/maven-public/" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="aliyun" />
-      <option name="name" value="Alibaba Cloud Repository" />
-      <option name="url" value="http://218.61.32.122:8081/repository/maven-public/" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="aliyun" />
-      <option name="name" value="Alibaba Cloud Repository" />
-      <option name="url" value="https://maven.aliyun.com/repository/public" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="jboss.community" />
@@ -60,11 +45,6 @@
       <option name="id" value="spring-milestones" />
       <option name="name" value="spring-milestones" />
       <option name="url" value="https://repo.spring.io/milestone" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="central" />
-      <option name="name" value="Central Repository" />
-      <option name="url" value="http://218.61.32.122:8081/repository/maven-public/" />
     </remote-repository>
   </component>
 </project>
