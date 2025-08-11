@@ -7,41 +7,111 @@ import com.ml.member.dao.DaySignGrowthAwardDao;
 import com.ml.member.dao.GrowthChangeHistoryDao;
 import com.ml.member.dao.MemberDao;
 import com.ml.member.dao.MemberDaySignDao;
-import com.ml.member.dto.MemberDaySignInfoRes;
-import com.ml.member.dto.MemberDaySignRes;
+import com.ml.member.vo.MemberDaySignInfoRes;
+import com.ml.member.vo.MemberDaySignRes;
 import com.ml.member.entity.DaySignGrowthAwardEntity;
 import com.ml.member.entity.MemberDaySignEntity;
 import com.ml.member.entity.MemberEntity;
 import com.ml.member.service.MemberDaySignService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
-
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service("memberDaySignService")
 public class MemberDaySignServiceImpl extends ServiceImpl<MemberDaySignDao, MemberDaySignEntity> implements MemberDaySignService {
-    @Autowired
-    private MemberDaySignDao memberDaySignDao;
+
+    private static final String DAY_SIGN_LIST_KEY = "member:daySign:";
+    private static final String LAST_SIGN_KEY = "member:lastSign:";
+    private static final String CONTINUE_DAYS_KEY = "sign:continue:";
+    private static final String START_SIGN_KEY = "sign:start:";
+
+
     @Autowired
     private GrowthChangeHistoryDao growthChangeHistoryDao;//暂时没写相关逻辑，下面有todo说明
     @Autowired
     private MemberDao memberDao ;
     @Autowired
     private DaySignGrowthAwardDao daySignGrowthAwardDao;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
 
+    private String getMonthKey(String date) {
+        return DAY_SIGN_LIST_KEY + date.substring(0, 6);// member:daySign:{yyyyMM}
+    }
 
     /**
-     * 用户签到
+     * 用户签到(基于redis)
      * @param memberId
      * @return true 签到成功，false 已签到过
      */
     @Override
     public Boolean daySignIn(Long memberId) {
         String todayDate= DateUtils.getTodayStr();
+        int dayOfMonth = DateUtils.getDayOfMonth(todayDate);
+        String daySignKey = getMonthKey(todayDate) + memberId;// member:daySign:{yyyyMM}:{memberId}
+
+        //判断今日是否签到过，如果已经签到过，则不允许重复签到
+        if (Boolean.TRUE.equals(redisTemplate.opsForValue().getBit(String.valueOf(memberId), dayOfMonth - 1))) {
+            return false;
+        }
+
+        String yesterdayDate = DateUtils.getTodayStr();
+
+        // Lua脚本搞里头，保证原子性操作（原设计是SessionCallback），此处换成RedisTemplate的execute方法，传入脚本和参数，咕咕嘎嘎
+        String luaScript = "local todayBit = ARGV[1] " +
+                "local memberId = ARGV[2] " +
+                "local todayDate = ARGV[3] " +
+                "local yesterdayDate = ARGV[4] " +
+                "local lastSignKey = KEYS[1] " +
+                "local continueKey = KEYS[2] " +
+                "local startSignKey = KEYS[3] " +
+                "local daySignKey = KEYS[4] " +
+                "" +
+                "redis.call('setbit', daySignKey, todayBit, 1) " +
+                "" +
+                "local lastSignDate = redis.call('get', lastSignKey) " +
+                "local continueDays = 1 " +
+                "" +
+                "if lastSignDate == yesterdayDate then " +
+                "continueDays = redis.call('incr', continueKey) " +
+                "else " +
+                "redis.call('set', continueKey, 1) " +
+                "redis.call('set', startSignKey, todayDate) " +
+                "end " +
+                "" +
+                "redis.call('set', lastSignKey, todayDate) " +
+                "redis.call('expire', lastSignKey, 60*60*24*40) " + // 40天过期
+                "redis.call('expire', continueKey, 60*60*24*40) " + // 40天过期
+                "redis.call('expire', startSignKey, 60*60*24*40) " + //40天过期
+                "return continueDays";
+        Long continueDays = redisTemplate.execute(new DefaultRedisScript<>(luaScript, Long.class),
+                Arrays.asList(
+                        LAST_SIGN_KEY + memberId,// member:lastSign:{memberId}
+                        CONTINUE_DAYS_KEY + memberId,// sign:continue:{memberId}
+                        START_SIGN_KEY + memberId,// sign:start:{memberId}
+                        daySignKey// member:daySign:{yyyyMM}:{memberId}
+                ),
+                Arrays.asList(
+                        String.valueOf(dayOfMonth - 1),
+                        String.valueOf(memberId),
+                        todayDate,
+                        yesterdayDate
+                ));
+        //增加成长值
+        DaySignGrowthAwardEntity daySignGrowthAward = daySignGrowthAwardDao.selectOne(new QueryWrapper<DaySignGrowthAwardEntity>().eq("continue_day", continueDays));
+        if(daySignGrowthAward!=null){
+            MemberEntity member = memberDao.selectOne(new QueryWrapper<MemberEntity>().eq("member_id", memberId));
+            member.setGrowth(member.getGrowth()+daySignGrowthAward.getGrowthAwardAmount());
+            memberDao.updateById(member);
+        }
+        return true;
+
+        /**  以下注释部分为原签到与数据库交互逻辑
         QueryWrapper queryWrapper = new QueryWrapper<MemberDaySignEntity>().eq("member_id", memberId);
         //查询最后一次签到记录
         queryWrapper.orderByDesc("sign_date");
@@ -77,26 +147,66 @@ public class MemberDaySignServiceImpl extends ServiceImpl<MemberDaySignDao, Memb
             return false;//已经签到过
         }
         return true;//签到成功
+         */
     }
 
     /**
-     * 查询用户连续签到信息（签到日历）
+     * 查询用户连续签到信息（签到日历）(基于redis)
      * @param memberId
      * @return
      */
     @Override
     public MemberDaySignInfoRes daySignInfo(Long memberId) {
-        /**
-         * 获取最后一次签到记录，用以计算连续天数
-         */
+
+        MemberDaySignInfoRes memberDaySignInfoRes = new MemberDaySignInfoRes();
+
+        // 1. 获取连续签到天数
+        String continueDaysStr = redisTemplate.opsForValue().get(CONTINUE_DAYS_KEY + memberId);
+        int continueDays = continueDaysStr != null ? Integer.parseInt(continueDaysStr) : 0;
+
+        // 2. 生成当月签到日历
+        String todayDate = DateUtils.getTodayStr();
+        String firstDayOfMonth = DateUtils.getFirstDayOfMonthStr();
+        List<String> dateList = DateUtils.getDateStringsBetween(firstDayOfMonth, todayDate);
+
+        List<MemberDaySignRes> calendarList = new ArrayList<>();
+        String monthKey = getMonthKey(todayDate);
+        String daySignKey = getMonthKey(todayDate) + memberId;// member:daySign:{yyyyMM}:{memberId}
+
+        // 使用管道批量获取签到状态
+        List<Object> results = redisTemplate.executePipelined((RedisCallback<Boolean>) connection -> {
+            for (int i = 0; i < dateList.size(); i++) {
+                connection.getBit(daySignKey.getBytes(), i);
+            }
+            return null;
+        });
+        List<Boolean> signStatusList = results.stream().map(Object::toString).map(Boolean::valueOf).collect(Collectors.toList());
+
+        // 构建日历数据
+        for (int i = 0; i < dateList.size(); i++) {
+            MemberDaySignRes memberDaySignRes = new MemberDaySignRes();
+            memberDaySignRes.setSignDate(dateList.get(i));
+            memberDaySignRes.setSignStatus(Boolean.TRUE.equals(signStatusList.get(i)) ? 1 : 0);
+            calendarList.add(memberDaySignRes);
+        }
+
+        //封装返回结果
+        memberDaySignInfoRes.setContinueDay(continueDays);
+        memberDaySignInfoRes.setCalendarList(calendarList);
+
+        return memberDaySignInfoRes;
+
+        /**以下注释部分为原查询签到日历与数据库交互逻辑
+
+
+         //获取最后一次签到记录，用以计算连续天数
         QueryWrapper queryWrapper = new QueryWrapper<MemberDaySignEntity>().eq("member_id", memberId);
         queryWrapper.orderByDesc("sign_date");
         queryWrapper.last("limit 1");
         MemberDaySignEntity memberDayLastSign = memberDaySignDao.selectOne(queryWrapper);
 
-        /**
-         * 获取本月签到记录，并以日期为key存入map中
-         */
+         //获取本月签到记录，并以日期为key存入map中
+
         String todayDate = DateUtils.getTodayStr();
         String firstDayOfMonth = DateUtils.getFirstDayOfMonthStr();
         List<String> DatesInMonth = DateUtils.getDateStringsBetween(firstDayOfMonth,todayDate);
@@ -115,16 +225,41 @@ public class MemberDaySignServiceImpl extends ServiceImpl<MemberDaySignDao, Memb
             daySignList.add(day);
         }
 
-        /**
-         * 封装返回结果
-         */
-        MemberDaySignInfoRes memberDaySignInfoRes = new MemberDaySignInfoRes();
+         //封装返回结果
+
         memberDaySignInfoRes.setContinueDay(memberDayLastSign.getContinueDay());
         memberDaySignInfoRes.setCalendarList(daySignList);
         memberDaySignInfoRes.setGrowthRewardTotal(null);
         //TODO:setGrowthRewardTotal
         return memberDaySignInfoRes;
+
+         */
+
     }
 
 
+    /**
+     * 计算总成长值奖励(该方法暂不采用)
+     * @param memberId
+     * @param calendar
+     * @return
+     */
+    private Integer calculateTotalGrowth(Long memberId, List<MemberDaySignRes> calendar) {
+        int total = 0;
+        int currentStreak = 0;
+
+        for (MemberDaySignRes day : calendar) {
+            if (day.getSignStatus() == 1) {
+                currentStreak++;
+                DaySignGrowthAwardEntity award = daySignGrowthAwardDao.selectOne(
+                        new QueryWrapper<DaySignGrowthAwardEntity>().eq("continue_day", currentStreak));
+                if (award != null) {
+                    total += award.getGrowthAwardAmount();
+                }
+            } else {
+                currentStreak = 0;
+            }
+        }
+        return total;
+    }
 }
