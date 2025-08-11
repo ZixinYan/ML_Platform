@@ -12,9 +12,5 @@ public class MemberDaySignRes {
      * 签到状态 0 未签到 1 已签到
      */
     private Integer signStatus;
-    /**
-     * 成长值奖励
-     */
-    private Integer growthRewardAmount;
 
 }

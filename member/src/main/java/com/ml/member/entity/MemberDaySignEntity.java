@@ -19,11 +19,11 @@ public class MemberDaySignEntity implements Serializable {
      */
     private String signDate;
     /**
-     *连续签到天数
+     *连续签到天数(建表不包含此字段)
      */
     private Integer continueDay;
     /**
-     * 本轮初始签到日期
+     * 本轮初始签到日期(建表不包含此字段)
      */
     private String startSignDate;
     /**
