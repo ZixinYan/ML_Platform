@@ -1,7 +1,7 @@
 package com.ml.member.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.ml.member.dto.MemberDaySignInfoRes;
+import com.ml.member.vo.MemberDaySignInfoRes;
 import com.ml.member.entity.MemberDaySignEntity;
 import org.springframework.stereotype.Service;
 

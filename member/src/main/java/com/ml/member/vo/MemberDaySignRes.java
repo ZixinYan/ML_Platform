@@ -1,4 +1,4 @@
-package com.ml.member.dto;
+package com.ml.member.vo;
 
 import lombok.Data;
 
