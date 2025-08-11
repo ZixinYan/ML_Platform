@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class DateUtils {
 
     // 默认日期格式
-    private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     // 私有构造方法，防止实例化
     private DateUtils() {}
@@ -194,7 +194,7 @@ public class DateUtils {
         try {
             return LocalDate.parse(dateStr, DEFAULT_FORMATTER);
         } catch (Exception e) {
-            throw new IllegalArgumentException("日期格式不正确，应为 yyyy-MM-dd: " + dateStr, e);
+            throw new IllegalArgumentException("日期格式不正确，应为 yyyyMMdd: " + dateStr, e);
         }
     }
 

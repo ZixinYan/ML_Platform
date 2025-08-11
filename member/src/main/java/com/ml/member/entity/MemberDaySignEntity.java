@@ -13,7 +13,6 @@ public class MemberDaySignEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @TableId
-    private Long id;
     private Long memberId;
     /**
      * 签到日期
@@ -22,15 +21,11 @@ public class MemberDaySignEntity implements Serializable {
     /**
      *连续签到天数
      */
-    private Integer continueDay=0;
+    private Integer continueDay;
     /**
      * 本轮初始签到日期
      */
     private String startSignDate;
-    /**
-     * 奖励积分
-     */
-    private Integer rewardGrowthAmount;
     /**
      * 签到状态
      */
