@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ml.common.utils.DateUtils;
+import com.ml.common.utils.RedisLock;
 import com.ml.member.dao.DaySignGrowthAwardDao;
 import com.ml.member.dao.GrowthChangeHistoryDao;
 import com.ml.member.dao.MemberDao;
@@ -26,7 +27,9 @@ import java.io.IOException;
 @Service("memberDaySignService")
 public class MemberDaySignServiceImpl extends ServiceImpl<MemberDaySignDao, MemberDaySignEntity> implements MemberDaySignService {
 
-    private static final String SIGN_INFO_KEY = "sign:info:";
+    private static final String SIGN_INFO_KEY = "sign:info:";//redis缓存签到信息key前缀
+    private static final long expireTime = 30000; // 锁过期时间（30秒）
+    private static final long waitTime = 5000; // 等待获取锁的最大时间（5秒）
     
     @Autowired
     private GrowthChangeHistoryDao growthChangeHistoryDao;//暂时没写相关逻辑，下面有todo说明
@@ -38,6 +41,8 @@ public class MemberDaySignServiceImpl extends ServiceImpl<MemberDaySignDao, Memb
     private StringRedisTemplate redisTemplate;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private RedisLock redisLock;
     
     private String getSignInfoKey(Long memberId) {
         return SIGN_INFO_KEY + memberId;
@@ -52,32 +57,47 @@ public class MemberDaySignServiceImpl extends ServiceImpl<MemberDaySignDao, Memb
     public Boolean daySignIn(Long memberId) {
         String todayDate = DateUtils.getTodayStr();
         int bitSetIndex = DateUtils.getDayOfMonth(todayDate) - 1;
+        //创建单用户粒度锁键
+        String lockKey = "lock:member:sign:" + memberId;
+        String lockValue = UUID.randomUUID().toString(); // 唯一标识，避免释放其他线程的锁
 
-        // 获取或创建用户签到信息
-        MemberSignInfoEntity signInfo = getMemberSignInfoEntity(memberId);
-        // 检查今日是否已签到
-        if (signInfo.getSignStatus().get(bitSetIndex)) {return false;}
-        // 更新签到状态、连续签到信息、最后签到日期
-        signInfo.getSignStatus().set(bitSetIndex, true);
-        if (DateUtils.getYesterdayStr().equals(signInfo.getLastSignDate())) {
-            signInfo.setContinueDays(signInfo.getContinueDays() + 1);
-        } else {
-            signInfo.setContinueDays(1);
-            signInfo.setStartSignDate(todayDate);
+        try {
+            boolean locked = redisLock.tryLock(lockKey, lockValue, expireTime, waitTime);
+            if (!locked) {
+                log.warn("用户签到失败，获取锁超时: memberId={}", memberId);
+                return false; // 获取锁失败，返回签到失败
+            }
+            // 获取或创建用户签到信息
+            MemberSignInfoEntity signInfo = getMemberSignInfoEntity(memberId);
+            // 检查今日是否已签到
+            if (signInfo.getSignStatus().get(bitSetIndex)) {
+                return false;
+            }
+            // 更新签到状态、连续签到信息、最后签到日期
+            signInfo.getSignStatus().set(bitSetIndex, true);
+            if (DateUtils.getYesterdayStr().equals(signInfo.getLastSignDate())) {
+                signInfo.setContinueDays(signInfo.getContinueDays() + 1);
+            } else {
+                signInfo.setContinueDays(1);
+                signInfo.setStartSignDate(todayDate);
+            }
+            signInfo.setLastSignDate(todayDate);
+
+            // 保存签到信息到Redis
+            saveMemberSignInfo(memberId, signInfo);
+
+            // 增加成长值（这一块因为属于用户成长值的，他不应该放在签到缓存里，所以暂时写和db交互）
+            DaySignGrowthAwardEntity daySignGrowthAward = daySignGrowthAwardDao.selectOne(new QueryWrapper<DaySignGrowthAwardEntity>().eq("continue_day", signInfo.getContinueDays()));
+            if (daySignGrowthAward != null) {
+                MemberEntity member = memberDao.selectOne(new QueryWrapper<MemberEntity>().eq("member_id", memberId));
+                member.setGrowth(member.getGrowth() + daySignGrowthAward.getGrowthAwardAmount());
+                memberDao.updateById(member);
+            }
+            return true;
+
+        } finally {
+            redisTemplate.delete(lockKey);// 释放锁
         }
-        signInfo.setLastSignDate(todayDate);
-
-        // 保存签到信息到Redis
-        saveMemberSignInfo(memberId, signInfo);
-
-        // 增加成长值（这一块因为属于用户成长值的，他不应该放在签到缓存里，所以暂时写和db交互）
-        DaySignGrowthAwardEntity daySignGrowthAward = daySignGrowthAwardDao.selectOne(new QueryWrapper<DaySignGrowthAwardEntity>().eq("continue_day", signInfo.getContinueDays()));
-        if (daySignGrowthAward != null) {
-            MemberEntity member = memberDao.selectOne(new QueryWrapper<MemberEntity>().eq("member_id", memberId));
-            member.setGrowth(member.getGrowth() + daySignGrowthAward.getGrowthAwardAmount());
-            memberDao.updateById(member);
-        }
-        return true;
     }
 
     /**
