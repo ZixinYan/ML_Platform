@@ -13,7 +13,7 @@ public class MemberDaySignInfoRes {
     /**
      * 签到日历列表
      */
-    private List<MemberDaySignRes> calendarList;
+    private String signStatusStr;
     /**
      * 本轮连续签到初始日期
      */

@@ -1,10 +1,9 @@
 package com.ml.member.dataPersistence;
 
 import com.ml.common.utils.DateUtils;
-import com.ml.member.dao.MemberDaySignDao;
 import com.ml.member.entity.MemberDaySignEntity;
 import com.ml.member.service.MemberDaySignService;
-import org.springframework.dao.DataAccessException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -27,6 +26,7 @@ import java.util.regex.Pattern;
  * 数据源：com/ml/member/service/impl/MemberDaySignServiceImpl.java
  */
 
+@Slf4j
 @Component
 public class SignDataPersistenceService {
 
@@ -94,8 +94,7 @@ public class SignDataPersistenceService {
 
         } catch (Exception e) {
             // 记录错误但继续处理其他键, 本应使用日志框架
-            //Todo:To:yzx:为什么不告诉我用的什么日志框架，你的编程观念怎么了，你才21岁，这样你42岁不告诉4个人，84岁不告诉8个人，你就变成八岐大蛇了你知道么，作为须佐能乎，我可能得打败你了
-            System.err.println("Error processing key: " + key + ", Error: " + e.getMessage());
+            log.error("Error processing key: {}, Error: {}", key, e.getMessage());
         }
     }
 
@@ -114,9 +113,7 @@ public class SignDataPersistenceService {
         );
     }
 
-    private List<MemberDaySignEntity> convertToEntities(
-            Long memberId, String yearMonth, byte[] bitmapBytes
-    ) {
+    private List<MemberDaySignEntity> convertToEntities(Long memberId, String yearMonth, byte[] bitmapBytes) {
         // 解析年月 (格式: yyyyMM -> YearMonth)
         YearMonth ym = YearMonth.of(
                 Integer.parseInt(yearMonth.substring(0, 4)),

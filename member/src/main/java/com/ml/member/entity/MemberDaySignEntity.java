@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 @Data
 @TableName("member_day_sign")
@@ -19,18 +18,17 @@ public class MemberDaySignEntity implements Serializable {
      */
     private String signDate;
     /**
-     *连续签到天数(建表不包含此字段)
+     *连续签到天数
      */
     private Integer continueDay;
     /**
-     * 本轮初始签到日期(建表不包含此字段)
+     * 本轮初始签到日期
      */
     private String startSignDate;
     /**
      * 签到状态
      */
-    private Integer signStatus;
-
+    private int signStatus;
 
     public MemberDaySignEntity(Long memberId, String signDate, int signStatus) {
         this.memberId = memberId;
