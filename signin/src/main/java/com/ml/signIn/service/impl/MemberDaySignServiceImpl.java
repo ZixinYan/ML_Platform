@@ -6,12 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ml.common.utils.DateUtils;
 import com.ml.common.utils.RedisLock;
 import com.ml.signIn.dao.DaySignGrowthAwardDao;
-import com.ml.signIn.dao.MemberDao;
 import com.ml.signIn.dao.MemberDaySignDao;
+import com.ml.signIn.feign.MemberFeignService;
 import com.ml.signIn.vo.MemberDaySignInfoRes;
 import com.ml.signIn.entity.DaySignGrowthAwardEntity;
 import com.ml.signIn.entity.MemberDaySignEntity;
-import com.ml.member.entity.MemberEntity;
 import com.ml.signIn.entity.MemberSignInfoEntity;
 import com.ml.signIn.service.MemberDaySignService;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,7 @@ public class MemberDaySignServiceImpl extends ServiceImpl<MemberDaySignDao, Memb
     private static final long waitTime = 5000; // 等待获取锁的最大时间（5秒）
 
     @Autowired
-    private MemberDao memberDao ;
+    private MemberFeignService memberFeignClient;
     @Autowired
     private DaySignGrowthAwardDao daySignGrowthAwardDao;
     @Autowired
@@ -83,13 +82,17 @@ public class MemberDaySignServiceImpl extends ServiceImpl<MemberDaySignDao, Memb
             // 保存签到信息到Redis
             saveMemberSignInfo(memberId, signInfo);
 
-            // 增加成长值（这一块因为属于用户成长值的，他不应该放在签到缓存里，所以暂时写和db交互）
+            //利用feign调用member的update接口修改成长值，直接和db交互
+            Map <String , Object> updatemap= new HashMap<>();
+            updatemap.put("id", memberId);
             DaySignGrowthAwardEntity daySignGrowthAward = daySignGrowthAwardDao.selectOne(new QueryWrapper<DaySignGrowthAwardEntity>().eq("continue_day", signInfo.getContinueDays()));
             if (daySignGrowthAward != null) {
-                MemberEntity member = memberDao.selectOne(new QueryWrapper<MemberEntity>().eq("member_id", memberId));
-                member.setGrowth(member.getGrowth() + daySignGrowthAward.getGrowthAwardAmount());
-                memberDao.updateById(member);
+                updatemap.put("growth",daySignGrowthAward.getGrowthAwardAmount());
+            }else{
+                log.error("签到奖励表配置有误");
             }
+            memberFeignClient.update(updatemap);
+
             return true;
 
         } finally {
