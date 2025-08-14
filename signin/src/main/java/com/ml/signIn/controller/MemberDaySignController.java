@@ -1,9 +1,9 @@
-package com.ml.member.controller;
+package com.ml.signIn.controller;
 
 
 import com.ml.common.utils.R;
-import com.ml.member.vo.MemberDaySignInfoRes;
-import com.ml.member.service.MemberDaySignService;
+import com.ml.signIn.vo.MemberDaySignInfoRes;
+import com.ml.signIn.service.MemberDaySignService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

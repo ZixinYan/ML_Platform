@@ -1,7 +1,7 @@
-package com.ml.member.dao;
+package com.ml.signIn.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.ml.member.entity.DaySignGrowthAwardEntity;
+import com.ml.signIn.entity.DaySignGrowthAwardEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository

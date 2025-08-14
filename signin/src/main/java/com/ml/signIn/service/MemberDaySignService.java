@@ -1,8 +1,8 @@
-package com.ml.member.service;
+package com.ml.signIn.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.ml.member.vo.MemberDaySignInfoRes;
-import com.ml.member.entity.MemberDaySignEntity;
+import com.ml.signIn.vo.MemberDaySignInfoRes;
+import com.ml.signIn.entity.MemberDaySignEntity;
 import org.springframework.stereotype.Service;
 
 @Service

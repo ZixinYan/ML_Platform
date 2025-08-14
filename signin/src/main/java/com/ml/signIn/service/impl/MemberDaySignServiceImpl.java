@@ -1,20 +1,19 @@
-package com.ml.member.service.impl;
+package com.ml.signIn.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ml.common.utils.DateUtils;
 import com.ml.common.utils.RedisLock;
-import com.ml.member.dao.DaySignGrowthAwardDao;
-import com.ml.member.dao.GrowthChangeHistoryDao;
-import com.ml.member.dao.MemberDao;
-import com.ml.member.dao.MemberDaySignDao;
-import com.ml.member.vo.MemberDaySignInfoRes;
-import com.ml.member.entity.DaySignGrowthAwardEntity;
-import com.ml.member.entity.MemberDaySignEntity;
+import com.ml.signIn.dao.DaySignGrowthAwardDao;
+import com.ml.signIn.dao.MemberDao;
+import com.ml.signIn.dao.MemberDaySignDao;
+import com.ml.signIn.vo.MemberDaySignInfoRes;
+import com.ml.signIn.entity.DaySignGrowthAwardEntity;
+import com.ml.signIn.entity.MemberDaySignEntity;
 import com.ml.member.entity.MemberEntity;
-import com.ml.member.entity.MemberSignInfoEntity;
-import com.ml.member.service.MemberDaySignService;
+import com.ml.signIn.entity.MemberSignInfoEntity;
+import com.ml.signIn.service.MemberDaySignService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -30,9 +29,7 @@ public class MemberDaySignServiceImpl extends ServiceImpl<MemberDaySignDao, Memb
     private static final String SIGN_INFO_KEY = "sign:info:";//redis缓存签到信息key前缀
     private static final long expireTime = 30000; // 锁过期时间（30秒）
     private static final long waitTime = 5000; // 等待获取锁的最大时间（5秒）
-    
-    @Autowired
-    private GrowthChangeHistoryDao growthChangeHistoryDao;//暂时没写相关逻辑，下面有todo说明
+
     @Autowired
     private MemberDao memberDao ;
     @Autowired

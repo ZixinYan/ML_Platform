@@ -1,8 +1,6 @@
-package com.ml.member.vo;
+package com.ml.signIn.vo;
 
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 public class MemberDaySignInfoRes {

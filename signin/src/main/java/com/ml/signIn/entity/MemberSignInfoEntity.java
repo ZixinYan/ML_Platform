@@ -1,4 +1,4 @@
-package com.ml.member.entity;
+package com.ml.signIn.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;

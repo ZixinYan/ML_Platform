@@ -1,11 +1,10 @@
-package com.ml.member.dataPersistence;
+package com.ml.signIn.dataPersistence;
 
-import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ml.common.utils.DateUtils;
-import com.ml.member.entity.MemberDaySignEntity;
-import com.ml.member.entity.MemberSignInfoEntity;
-import com.ml.member.service.MemberDaySignService;
+import com.ml.signIn.entity.MemberDaySignEntity;
+import com.ml.signIn.entity.MemberSignInfoEntity;
+import com.ml.signIn.service.MemberDaySignService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
