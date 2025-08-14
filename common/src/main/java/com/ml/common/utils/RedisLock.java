@@ -10,7 +10,7 @@ import java.util.Collections;
 
 
 /**
- * Redis分布式锁工具类，暂时不使用，使用redisson
+ * Redis分布式锁工具类
  */
 @Component
 public class RedisLock {
