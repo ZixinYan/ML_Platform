@@ -14,25 +14,11 @@ public class MemberDaySignEntity implements Serializable {
     @TableId
     private Long memberId;
     /**
-     * 签到日期(yyyyMMdd)
+     * 签到日期年月(yyyyMM)
      */
-    private String signDate;
-    /**
-     *连续签到天数
-     */
-    private Integer continueDay;
-    /**
-     * 本轮初始签到日期
-     */
-    private String startSignDate;
+    private String yearMonth;
     /**
      * 签到状态
      */
-    private int signStatus;
-
-    public MemberDaySignEntity(Long memberId, String signDate, int signStatus) {
-        this.memberId = memberId;
-        this.signDate = signDate;
-        this.signStatus = signStatus;
-    }
+    private String signStatus;
 }
