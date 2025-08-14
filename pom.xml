@@ -23,6 +23,7 @@
 		<module>order</module>
 		<module>ml-pay</module>
         <module>signin</module>
+        <module>product</module>
     </modules>
 
 </project>
