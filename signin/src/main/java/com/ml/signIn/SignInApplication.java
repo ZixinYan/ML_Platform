@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 @EnableRedisHttpSession
-@MapperScan("com.ml.member.dao")
+@MapperScan("com.ml.signIn.dao")
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages= "com.ml.signIn.feign")
 @SpringBootApplication
