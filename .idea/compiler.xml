@@ -8,14 +8,16 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="agent" />
-        <module name="ml-pay" />
+        <module name="product" />
         <module name="ai-game" />
-        <module name="common" />
         <module name="code-hub" />
         <module name="auth-server" />
-        <module name="member" />
         <module name="blog" />
         <module name="ai-service" />
+        <module name="ml-pay" />
+        <module name="common" />
+        <module name="signin" />
+        <module name="member" />
         <module name="gateway" />
         <module name="third-party" />
         <module name="order" />
@@ -37,6 +39,8 @@
       <module name="ml-pay" options="-parameters" />
       <module name="ml-platform" options="" />
       <module name="order" options="" />
+      <module name="product" options="" />
+      <module name="signin" options="" />
       <module name="third-party" options="" />
     </option>
   </component>

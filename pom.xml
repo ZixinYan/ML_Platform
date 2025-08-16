@@ -22,6 +22,8 @@
 		<module>code-hub</module>
 		<module>order</module>
 		<module>ml-pay</module>
-	</modules>
+        <module>signin</module>
+        <module>product</module>
+    </modules>
 
 </project>

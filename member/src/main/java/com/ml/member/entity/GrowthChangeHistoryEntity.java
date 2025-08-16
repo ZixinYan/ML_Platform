@@ -21,7 +21,7 @@ public class GrowthChangeHistoryEntity implements Serializable {
 	private Integer changeCount;
 	private String note;
 	/**
-	 * 积分来源[0-购物，1-管理员修改]
+	 * 积分来源[0-购物，1-管理员修改，2-签到]
 	 */
 	private Integer sourceType;
 }
