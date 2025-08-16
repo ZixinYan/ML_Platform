@@ -6,6 +6,7 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+*.class
 
 ./idea
 ./.idea/.gitignore
