@@ -33,6 +33,12 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
     }
 
     @Override
+    public void createProdBatch(Map<String, Object> prodMap){
+        List<Map<String, Object>> prodMaps = (List<Map<String, Object>>) prodMap;
+        prodMaps.forEach(this::createProd);
+    }
+
+    @Override
     public void updateProd(Map<String, Object> updateMap) {
         Long prodId = updateMap.get("prodId") != null ? Long.valueOf(updateMap.get("prodId").toString()) : null;
         if (prodId == null) {
@@ -76,6 +82,16 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
                 .filter(prod -> prod.getStatus() != 0) // 排除已删除的商品
                 .map(this::convertToMap)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public T selectProdById(Long id) {
+        // 根据ID查询商品
+        T prodInfo = this.getById(id);
+        if (prodInfo == null) {
+            throw new RuntimeException("未找到该商品");
+        }
+        return prodInfo;
     }
 
     // 处理通用属性的方法
