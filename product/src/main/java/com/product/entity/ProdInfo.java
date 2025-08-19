@@ -1,5 +1,6 @@
 package com.product.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 @Data
@@ -7,7 +8,8 @@ public abstract class ProdInfo {
     /**
      * 商品ID
      */
-    protected Long prodId;
+    @TableId
+    protected Long id;
     /**
      * 商品名称
      */

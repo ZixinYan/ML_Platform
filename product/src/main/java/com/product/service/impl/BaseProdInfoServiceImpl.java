@@ -2,6 +2,7 @@ package com.product.service.impl;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.product.entity.ProdInfo;
 import com.product.service.BaseProdInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
 
     @Autowired
     protected M baseProdInfoMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     public void createProd(Map<String, Object> prodMap) {
@@ -75,23 +78,44 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
     }
 
     @Override
-    public List<Map<String, Object>> listProdAll(){
+    public String listProdAll(){
         // 查询所有未删除的商品
-        return baseProdInfoMapper.selectList(null)
-                .stream()
-                .filter(prod -> prod.getStatus() != 0) // 排除已删除的商品
-                .map(this::convertToMap)
-                .collect(Collectors.toList());
+        String allProdJson;
+        try {
+            allProdJson = objectMapper.writeValueAsString(baseProdInfoMapper.selectList(null).stream().filter(prod -> prod.getStatus() != 0).collect(Collectors.toList()));
+        } catch (Exception e) {
+            throw new RuntimeException("序列化商品信息失败");
+        }
+        return allProdJson;
     }
 
+
     @Override
-    public T selectProdById(Long id) {
+    public String selectProdById(Long id) {
         // 根据ID查询商品
         T prodInfo = this.getById(id);
         if (prodInfo == null) {
             throw new RuntimeException("未找到该商品");
         }
-        return prodInfo;
+        String prodInfoJson;
+        try {
+            prodInfoJson = objectMapper.writeValueAsString(prodInfo);
+        } catch (Exception e) {
+            throw new RuntimeException("序列化商品信息失败");
+        }
+        return prodInfoJson;
+    }
+
+    @Override
+    public String selectProdBatchByIds(List<Long> ids) {
+        // 根据ID列表查询商品，并转换为JSON字符串
+        String prodInfoJson;
+        try {
+            prodInfoJson = objectMapper.writeValueAsString(baseProdInfoMapper.selectBatchIds(ids));
+        } catch (Exception e) {
+            throw new RuntimeException("序列化商品信息失败");
+        }
+        return prodInfoJson;
     }
 
     // 处理通用属性的方法
@@ -140,10 +164,10 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         }
     }
 
-    // 转换实体为Map的通用方法
+    // 转换实体为Map的通用方法(原本是将list数据中的对象转map类型，后来改为转json字符串，此方法暂时弃用)
     protected Map<String, Object> convertToMap(T prod) {
         Map<String, Object> map = new HashMap<>();
-        map.put("prodId", prod.getProdId());
+        map.put("Id", prod.getId());
         map.put("prodName", prod.getProdName());
         map.put("prodShortDescription", prod.getProdShortDescription());
         map.put("prodPrice", prod.getProdPrice());
