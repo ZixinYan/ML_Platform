@@ -36,9 +36,12 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
     }
 
     @Override
-    public void createProdBatch(Map<String, Object> prodMap){
-        List<Map<String, Object>> prodMaps = (List<Map<String, Object>>) prodMap;
-        prodMaps.forEach(this::createProd);
+    public void createProdBatch(List<Map<String, Object>> prodMapList){
+        try{
+            prodMapList.forEach(this::createProd);
+        }catch(ClassCastException e){
+            throw new IllegalArgumentException("传入的数据格式不正确");
+        }
     }
 
     @Override
@@ -78,6 +81,15 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
     }
 
     @Override
+    public void deleteProdBatch(List<Long> idList){
+        try{
+            idList.forEach(this::deleteProd);
+        }catch(ClassCastException e){
+            throw new IllegalArgumentException("传入的数据格式不正确");
+        }
+    }
+
+    @Override
     public String listProdAll(){
         // 查询所有未删除的商品
         String allProdJson;
@@ -97,6 +109,9 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         if (prodInfo == null) {
             throw new RuntimeException("未找到该商品");
         }
+        if(prodInfo.getStatus() == 0){
+            throw new RuntimeException("该商品已被删除");
+        }
         String prodInfoJson;
         try {
             prodInfoJson = objectMapper.writeValueAsString(prodInfo);
@@ -111,7 +126,7 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         // 根据ID列表查询商品，并转换为JSON字符串
         String prodInfoJson;
         try {
-            prodInfoJson = objectMapper.writeValueAsString(baseProdInfoMapper.selectBatchIds(ids));
+            prodInfoJson = objectMapper.writeValueAsString(baseProdInfoMapper.selectBatchIds(ids).stream().filter(prod -> prod.getStatus() != 0).collect(Collectors.toList()));
         } catch (Exception e) {
             throw new RuntimeException("序列化商品信息失败");
         }
@@ -126,7 +141,6 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         prodInfo.setDiscount(prodMap.get("discount") != null ? Double.valueOf(prodMap.get("discount").toString()) : 1.0);
         prodInfo.setProdDiscountPrice(prodInfo.getProdPrice() * prodInfo.getDiscount());
         prodInfo.setImageUrl((String) prodMap.get("imageUrl"));
-        prodInfo.setLabel((String) prodMap.get("label"));
         prodInfo.setStatus(2); // 默认上架状态
         prodInfo.setProdDetail((String) prodMap.get("prodDetail"));
         prodInfo.setOwnerId(prodMap.get("ownerId") != null ? Long.valueOf(prodMap.get("ownerId").toString()) : 0L);
@@ -153,9 +167,6 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         if (updateMap.containsKey("imageUrl")) {
             prodInfo.setImageUrl((String) updateMap.get("imageUrl"));
         }
-        if (updateMap.containsKey("label")) {
-            prodInfo.setLabel((String) updateMap.get("label"));
-        }
         if (updateMap.containsKey("status")) {
             prodInfo.setStatus(Integer.valueOf(updateMap.get("status").toString()));
         }
@@ -174,7 +185,6 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         map.put("discount", prod.getDiscount());
         map.put("prodDiscountPrice", prod.getProdDiscountPrice());
         map.put("imageUrl", prod.getImageUrl());
-        map.put("label", prod.getLabel());
         map.put("status", prod.getStatus());
         map.put("createTime", prod.getCreateTime());
         map.put("updateTime", prod.getUpdateTime());
