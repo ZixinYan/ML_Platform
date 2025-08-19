@@ -2,6 +2,7 @@ package com.product.service.impl;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.product.entity.ProdInfo;
 import com.product.service.BaseProdInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
 
     @Autowired
     protected M baseProdInfoMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     public void createProd(Map<String, Object> prodMap) {
@@ -30,6 +33,15 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         prodInfo.setUpdateTime(currentTime);
         // 保存商品
         this.save(prodInfo);
+    }
+
+    @Override
+    public void createProdBatch(List<Map<String, Object>> prodMapList){
+        try{
+            prodMapList.forEach(this::createProd);
+        }catch(ClassCastException e){
+            throw new IllegalArgumentException("传入的数据格式不正确");
+        }
     }
 
     @Override
@@ -69,13 +81,56 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
     }
 
     @Override
-    public List<Map<String, Object>> listProdAll(){
+    public void deleteProdBatch(List<Long> idList){
+        try{
+            idList.forEach(this::deleteProd);
+        }catch(ClassCastException e){
+            throw new IllegalArgumentException("传入的数据格式不正确");
+        }
+    }
+
+    @Override
+    public String listProdAll(){
         // 查询所有未删除的商品
-        return baseProdInfoMapper.selectList(null)
-                .stream()
-                .filter(prod -> prod.getStatus() != 0) // 排除已删除的商品
-                .map(this::convertToMap)
-                .collect(Collectors.toList());
+        String allProdJson;
+        try {
+            allProdJson = objectMapper.writeValueAsString(baseProdInfoMapper.selectList(null).stream().filter(prod -> prod.getStatus() != 0).collect(Collectors.toList()));
+        } catch (Exception e) {
+            throw new RuntimeException("序列化商品信息失败");
+        }
+        return allProdJson;
+    }
+
+
+    @Override
+    public String selectProdById(Long id) {
+        // 根据ID查询商品
+        T prodInfo = this.getById(id);
+        if (prodInfo == null) {
+            throw new RuntimeException("未找到该商品");
+        }
+        if(prodInfo.getStatus() == 0){
+            throw new RuntimeException("该商品已被删除");
+        }
+        String prodInfoJson;
+        try {
+            prodInfoJson = objectMapper.writeValueAsString(prodInfo);
+        } catch (Exception e) {
+            throw new RuntimeException("序列化商品信息失败");
+        }
+        return prodInfoJson;
+    }
+
+    @Override
+    public String selectProdBatchByIds(List<Long> ids) {
+        // 根据ID列表查询商品，并转换为JSON字符串
+        String prodInfoJson;
+        try {
+            prodInfoJson = objectMapper.writeValueAsString(baseProdInfoMapper.selectBatchIds(ids).stream().filter(prod -> prod.getStatus() != 0).collect(Collectors.toList()));
+        } catch (Exception e) {
+            throw new RuntimeException("序列化商品信息失败");
+        }
+        return prodInfoJson;
     }
 
     // 处理通用属性的方法
@@ -86,7 +141,6 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         prodInfo.setDiscount(prodMap.get("discount") != null ? Double.valueOf(prodMap.get("discount").toString()) : 1.0);
         prodInfo.setProdDiscountPrice(prodInfo.getProdPrice() * prodInfo.getDiscount());
         prodInfo.setImageUrl((String) prodMap.get("imageUrl"));
-        prodInfo.setLabel((String) prodMap.get("label"));
         prodInfo.setStatus(2); // 默认上架状态
         prodInfo.setProdDetail((String) prodMap.get("prodDetail"));
         prodInfo.setOwnerId(prodMap.get("ownerId") != null ? Long.valueOf(prodMap.get("ownerId").toString()) : 0L);
@@ -113,9 +167,6 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         if (updateMap.containsKey("imageUrl")) {
             prodInfo.setImageUrl((String) updateMap.get("imageUrl"));
         }
-        if (updateMap.containsKey("label")) {
-            prodInfo.setLabel((String) updateMap.get("label"));
-        }
         if (updateMap.containsKey("status")) {
             prodInfo.setStatus(Integer.valueOf(updateMap.get("status").toString()));
         }
@@ -124,17 +175,16 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         }
     }
 
-    // 转换实体为Map的通用方法
+    // 转换实体为Map的通用方法(原本是将list数据中的对象转map类型，后来改为转json字符串，此方法暂时弃用)
     protected Map<String, Object> convertToMap(T prod) {
         Map<String, Object> map = new HashMap<>();
-        map.put("prodId", prod.getProdId());
+        map.put("Id", prod.getId());
         map.put("prodName", prod.getProdName());
         map.put("prodShortDescription", prod.getProdShortDescription());
         map.put("prodPrice", prod.getProdPrice());
         map.put("discount", prod.getDiscount());
         map.put("prodDiscountPrice", prod.getProdDiscountPrice());
         map.put("imageUrl", prod.getImageUrl());
-        map.put("label", prod.getLabel());
         map.put("status", prod.getStatus());
         map.put("createTime", prod.getCreateTime());
         map.put("updateTime", prod.getUpdateTime());

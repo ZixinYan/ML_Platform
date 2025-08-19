@@ -1,5 +1,6 @@
 package com.product.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 @Data
@@ -7,7 +8,8 @@ public abstract class ProdInfo {
     /**
      * 商品ID
      */
-    protected Long prodId;
+    @TableId
+    protected Long id;
     /**
      * 商品名称
      */
@@ -33,11 +35,7 @@ public abstract class ProdInfo {
      */
     private String ImageUrl;
     /**
-     * 商品标签 1-common,2-code,3-flashSale
-     */
-    private String label;
-    /**
-     * 商品状态，0表示已删除，1表示已下架，2表示上架中，3表示上架中但库存不足，4表示异常
+     * 商品状态，0表示已删除，1表示已下架，2表示上架中，3表示上架中但库存不足，4表示异常(前端不传默认2)
      */
     protected Integer Status;
     /**
