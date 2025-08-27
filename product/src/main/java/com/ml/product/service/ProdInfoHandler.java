@@ -1,6 +1,6 @@
-package com.product.service;
+package com.ml.product.service;
 
-import com.product.factory.ProdInfoFactory;
+import com.ml.product.factory.ProdInfoFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

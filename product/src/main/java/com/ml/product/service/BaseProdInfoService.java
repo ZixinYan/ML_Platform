@@ -1,7 +1,7 @@
-package com.product.service;
+package com.ml.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.product.entity.ProdInfo;
+import com.ml.product.entity.ProdInfo;
 import java.util.Map;
 import java.util.List;
 

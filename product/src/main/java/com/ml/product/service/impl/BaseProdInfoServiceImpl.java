@@ -1,10 +1,10 @@
-package com.product.service.impl;
+package com.ml.product.service.impl;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.product.entity.ProdInfo;
-import com.product.service.BaseProdInfoService;
+import com.ml.product.entity.ProdInfo;
+import com.ml.product.service.BaseProdInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 

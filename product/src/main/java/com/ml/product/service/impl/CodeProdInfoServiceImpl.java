@@ -1,8 +1,8 @@
-package com.product.service.impl;
+package com.ml.product.service.impl;
 
-import com.product.dao.CodeProdInfoDao;
-import com.product.entity.CodeProdInfo;
-import com.product.service.CodeProdInfoService;
+import com.ml.product.dao.CodeProdInfoDao;
+import com.ml.product.entity.CodeProdInfo;
+import com.ml.product.service.CodeProdInfoService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

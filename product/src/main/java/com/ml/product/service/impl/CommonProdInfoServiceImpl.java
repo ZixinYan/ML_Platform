@@ -1,8 +1,8 @@
-package com.product.service.impl;
+package com.ml.product.service.impl;
 
-import com.product.dao.CommonProdInfoDao;
-import com.product.entity.CommonProdInfo;
-import com.product.service.CommonProdInfoService;
+import com.ml.product.dao.CommonProdInfoDao;
+import com.ml.product.entity.CommonProdInfo;
+import com.ml.product.service.CommonProdInfoService;
 import org.springframework.stereotype.Service;
 
 @Service

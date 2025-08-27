@@ -1,7 +1,7 @@
-package com.product.controller;
+package com.ml.product.controller;
 
 import com.ml.common.utils.R;
-import com.product.service.ProdInfoHandler;
+import com.ml.product.service.ProdInfoHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

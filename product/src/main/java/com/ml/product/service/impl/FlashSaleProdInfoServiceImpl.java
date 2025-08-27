@@ -1,8 +1,8 @@
-package com.product.service.impl;
+package com.ml.product.service.impl;
 
-import com.product.dao.FlashSaleProdInfoDao;
-import com.product.entity.FlashSaleProdInfo;
-import com.product.service.FlashSaleProdInfoService;
+import com.ml.product.dao.FlashSaleProdInfoDao;
+import com.ml.product.entity.FlashSaleProdInfo;
+import com.ml.product.service.FlashSaleProdInfoService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
