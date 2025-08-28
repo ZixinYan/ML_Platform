@@ -18,7 +18,7 @@ public class Order {
      * 订单Id
      */
     @TableId(type = IdType.AUTO)
-    private Long id;
+    private Long OrderId;
 
     /**
      *
@@ -28,7 +28,7 @@ public class Order {
     /**
      *
      */
-    private Long goodsId;
+    private Long ProdId;
 
     /**
      *
@@ -38,17 +38,17 @@ public class Order {
     /**
      *
      */
-    private String goodsName;
+    private String ProdName;
 
     /**
      *
      */
-    private Integer goodsCount;
+    private Integer ProdCount;
 
     /**
      *
      */
-    private BigDecimal goodsPrice;
+    private BigDecimal ProdPrice;
 
     /**
      * 订单渠道 1pc，2Android，
@@ -65,10 +65,10 @@ public class Order {
     /**
      *
      */
-    private Date createDate;
+    private Long createTime;
 
     /**
      *
      */
-    private Date payDate;
+    private Long payTime;
 }
