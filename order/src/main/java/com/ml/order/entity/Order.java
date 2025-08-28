@@ -63,12 +63,12 @@ public class Order {
     private Integer status;
 
     /**
-     *
+     *创建时间(timestamp)
      */
     private Long createTime;
 
     /**
-     *
+     *支付时间(timestamp)
      */
     private Long payTime;
 }
