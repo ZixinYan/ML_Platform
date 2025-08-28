@@ -74,24 +74,24 @@ public class prodInfoController {
      * 查询全部商品信息
      */
     @PostMapping("/listProdAll")
-    public R<String> listProdAll(@RequestBody String label) {
-        return R.ok(prodInfoHandler.ListProdInfo(label));
+    public R<String> listProdAll(@RequestBody String label,@RequestBody Long ownerId) {
+        return R.ok(prodInfoHandler.ListProdInfo(label,ownerId));
     }
 
     /**
      * 根据id查询单个商品信息
      */
     @PostMapping("/selectProd")
-    public R<String> selectProdById(@RequestBody String label,@RequestBody Long id) {
-        return R.ok(prodInfoHandler.SelectProdInfo(label, id));
+    public R<String> selectProdById(@RequestBody String label,@RequestBody Long id,@RequestBody Long ownerId) {
+        return R.ok(prodInfoHandler.SelectProdInfo(label, id, ownerId));
     }
 
     /**
      * 根据ids批量查询商品信息
      */
     @PostMapping("/selectProdBatch")
-    public R<String> selectProdBatchByIds(@RequestBody String label,@RequestBody List<Long> ids) {
-        return R.ok(prodInfoHandler.SelectProdBatchInfo(label, ids));
+    public R<String> selectProdBatchByIds(@RequestBody String label,@RequestBody List<Long> ids,@RequestBody Long ownerId) {
+        return R.ok(prodInfoHandler.SelectProdBatchInfo(label, ids, ownerId));
     }
 
 }

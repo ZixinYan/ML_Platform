@@ -55,16 +55,16 @@ public class ProdInfoHandler {
         prodInfoFactory.getProdInfoService(label).deleteProdBatch(ids);
     }
 
-    public String ListProdInfo(String label) {
-        return prodInfoFactory.getProdInfoService(label).listProdAll();
+    public String ListProdInfo(String label,Long ownerId) {
+        return prodInfoFactory.getProdInfoService(label).listProdAll(ownerId);
     }
 
-    public String SelectProdInfo(String label, Long id) {
-        return prodInfoFactory.getProdInfoService(label).selectProdById(id);
+    public String SelectProdInfo(String label, Long id,Long ownerId) {
+        return prodInfoFactory.getProdInfoService(label).selectProdById(id,ownerId);
     }
 
-    public String SelectProdBatchInfo(String label, List<Long> ids) {
-        return prodInfoFactory.getProdInfoService(label).selectProdBatchByIds(ids);
+    public String SelectProdBatchInfo(String label, List<Long> ids,Long ownerId) {
+        return prodInfoFactory.getProdInfoService(label).selectProdBatchByIds(ids,ownerId);
     }
 
 }

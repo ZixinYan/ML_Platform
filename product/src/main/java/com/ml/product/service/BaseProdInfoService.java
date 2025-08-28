@@ -12,14 +12,20 @@ public interface BaseProdInfoService<T extends ProdInfo> extends IService<T> {
     void createProdBatch(List<Map<String, Object>> prodMapList);
     // 通用更新方法
     void updateProd(Map<String, Object> updateMap);
+    //更新商品状态（内部接口）
+    void updateProdStatus(Long id, Integer status);
+    //查询商品名称（内部接口）
+    String selectProdNameById(Long id);
+    //查询商品状态（内部接口）
+    Integer selectProdStatusById(Long id);
     // 通用删除方法
     void deleteProd(Long id);
     //批量删除方法
     void deleteProdBatch(List<Long> ids);
     // 查询全部方法
-    String listProdAll();
+    String listProdAll(Long ownerId);
     // 通用查询方法
-    String selectProdById(Long id);
+    String selectProdById(Long id,Long ownerId);
     // 批量查询方法
-    String selectProdBatchByIds(List<Long> ids);
+    String selectProdBatchByIds(List<Long> ids,Long ownerId);
 }

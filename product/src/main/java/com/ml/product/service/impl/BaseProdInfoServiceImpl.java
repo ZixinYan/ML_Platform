@@ -2,15 +2,16 @@ package com.ml.product.service.impl;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ml.product.entity.ProdInfo;
 import com.ml.product.service.BaseProdInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends ProdInfo> extends ServiceImpl<M, T> implements BaseProdInfoService<T> {
@@ -65,6 +66,21 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         this.updateById(prodInfo);
     }
 
+    //这个接口是给内部调用的，用于在缺货等场景改变状态
+    public void updateProdStatus(Long id, Integer status){
+        if (id == null) {
+            throw new IllegalArgumentException("商品ID不能为空");
+        }
+
+        T prodInfo = this.getById(id);
+        if (prodInfo == null) {
+            throw new RuntimeException("未找到该商品");
+        }
+        prodInfo.setStatus(status);
+        prodInfo.setUpdateTime(System.currentTimeMillis());
+        this.updateById(prodInfo);
+    }
+
     @Override
     public void deleteProd(Long id) {
         if (id == null) {
@@ -90,11 +106,11 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
     }
 
     @Override
-    public String listProdAll(){
+    public String listProdAll(Long ownerId){
         // 查询所有未删除的商品
         String allProdJson;
         try {
-            allProdJson = objectMapper.writeValueAsString(baseProdInfoMapper.selectList(null).stream().filter(prod -> prod.getStatus() != 0).collect(Collectors.toList()));
+            allProdJson = objectMapper.writeValueAsString(baseProdInfoMapper.selectList(null).stream().filter(prod -> prod.getStatus() != 0).filter(prod -> Objects.equals(prod.getOwnerId(), ownerId)).collect(Collectors.toList()));
         } catch (Exception e) {
             throw new RuntimeException("序列化商品信息失败");
         }
@@ -103,7 +119,7 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
 
 
     @Override
-    public String selectProdById(Long id) {
+    public String selectProdById(Long id,Long ownerId) {
         // 根据ID查询商品
         T prodInfo = this.getById(id);
         if (prodInfo == null) {
@@ -111,6 +127,9 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         }
         if(prodInfo.getStatus() == 0){
             throw new RuntimeException("该商品已被删除");
+        }
+        if(!Objects.equals(prodInfo.getOwnerId(), ownerId)){
+            throw new RuntimeException("该商品不属于当前用户");
         }
         String prodInfoJson;
         try {
@@ -121,12 +140,30 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
         return prodInfoJson;
     }
 
+    public String selectProdNameById(Long id) {
+        // 根据ID查询商品名称
+        T prodInfo = this.getById(id);
+        if (prodInfo == null) {
+            throw new RuntimeException("未找到该商品");
+        }
+        return prodInfo.getProdName();
+    }
+
+    public Integer selectProdStatusById(Long id) {
+        // 根据ID查询商品状态
+        T prodInfo = this.getById(id);
+        if (prodInfo == null) {
+            throw new RuntimeException("未找到该商品");
+        }
+        return prodInfo.getStatus();
+    }
+
     @Override
-    public String selectProdBatchByIds(List<Long> ids) {
+    public String selectProdBatchByIds(List<Long> ids,Long ownerId) {
         // 根据ID列表查询商品，并转换为JSON字符串
         String prodInfoJson;
         try {
-            prodInfoJson = objectMapper.writeValueAsString(baseProdInfoMapper.selectBatchIds(ids).stream().filter(prod -> prod.getStatus() != 0).collect(Collectors.toList()));
+            prodInfoJson = objectMapper.writeValueAsString(baseProdInfoMapper.selectBatchIds(ids).stream().filter(prod -> prod.getStatus() != 0).filter(prod -> Objects.equals(prod.getOwnerId(), ownerId)).collect(Collectors.toList()));
         } catch (Exception e) {
             throw new RuntimeException("序列化商品信息失败");
         }
@@ -210,4 +247,14 @@ public abstract class BaseProdInfoServiceImpl<M extends BaseMapper<T>, T extends
 
     // 抽象方法：创建具体实例
     protected abstract T createProdInstance();
+
+    //解析json字符串为对象
+    private T phraseJsonToProd(String json) {
+        try {
+            return objectMapper.readValue(json, new TypeReference<T>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("解析商品信息失败");
+        }
+    }
+
 }
